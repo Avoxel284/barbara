@@ -1,4 +1,4 @@
-const barbara = require("../bin/");
+const barbara = require("../barbara/");
 
 // console.log(barbara.search("hi", { service: barbara.Service.spotify }));
 

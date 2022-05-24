@@ -21,5 +21,8 @@
 	"homepage": "https://github.com/Avoxel284/barbara#readme",
 	"dependencies": {
 		"axios": "^0.27.2"
+	},
+	"devDependencies": {
+		"@types/node": "^17.0.35"
 	}
 }
