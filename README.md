@@ -1,5 +1,9 @@
 <img src="./images/Banner.png">
 
+## WORK IN PROGRESS!
+
+Library is nowhere near finished! Please do not use.
+
 ## Backstory
 
 In the past, I coded a Discord bot named norikobot which used [play-dl](https://github.com/play-dl/play-dl). However, while play-dl was a great library for streaming music, it was archived and is no longer maintained. Thus, I created the Barbara Music module. Barbara Music was also a good opportunity for me to properly learn TypeScript.
