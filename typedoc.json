@@ -1,4 +1,7 @@
 {
 	"entryPoints": ["src/index.ts"],
-	"out": "docs"
+	"out": "docs",
+	"name": "Barbara Music",
+	"readme": "DOCS_README.md",
+	"media": "./media"
 }

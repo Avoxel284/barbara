@@ -1,4 +1,4 @@
-<img src="./images/Banner.png">
+<img src="./media/Banner.png">
 
 <b> [Documentation](https://avoxel284.github.io/barbara)</b>
 
