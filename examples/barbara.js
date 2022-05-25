@@ -1,4 +1,4 @@
-const barbara = require("../barbara/");
+const barbara = require("../dist");
 
 // console.log(barbara.search("hi", { service: barbara.Service.spotify }));
 
