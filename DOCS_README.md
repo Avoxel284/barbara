@@ -23,3 +23,7 @@ barbara.searchTrack("never gonna give you up", barbara.yt).then((track) => {
 	const resource = discordVoice.createAudioResource(track.resource());
 });
 ```
+
+<br>
+<br>
+please don't sue me hoyoverse
