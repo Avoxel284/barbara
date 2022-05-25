@@ -1,5 +1,10 @@
 import { Readable } from "stream";
 import { getTimeFromSeconds } from "../util";
+import prism from "prism-media";
+import axios from "axios";
+import { getKey } from "../auth";
+
+let clientId = getKey("soundcloudClientId");
 
 export interface SearchOptions {
 	/** Service to search track on */
@@ -70,13 +75,13 @@ export class MusicTrack {
 	/** Duration of the track **in seconds** */
 	duration: number;
 
-	/** Duration of the track **in timestamp** */
+	/** Duration of the track **in timestamp** (e.g. `12:34`) */
 	durationTimestamp?: string;
 
 	/** Has the track been playlisted? */
 	playlisted: boolean;
 
-	/** Service providing track */
+	/** The service providing track */
 	service?: Service;
 
 	/** Thumbnail of the track */
@@ -119,6 +124,90 @@ export class MusicTrack {
 		this.author = data.author;
 		this.originalData = data.originalData;
 	}
+
+	/**
+	 * Barbara will sing the track for you. Just kidding.
+	 * Returns a Prism Media FFmpeg object for use with Discord Voice.
+	 *
+	 * @example
+	 * ```
+	 * const resource = await discordVoice.createAudioResource(Track.sing());
+	 *
+	 * ```
+	 *
+	 * @param seek Number of seconds to seek in the track. Obviously defaults to 0
+	 * @param extraArgs An array of extra arguments to pass to Prism when creating the FFmpeg object
+	 * Basically just your standarad FFmpeg arguments but in array form. For example:
+	 * ```
+	 * "-f",
+	 * "opus",
+	 * "-ar",
+	 * "48000",
+	 * "-ac",
+	 * "2"
+	 * ```
+	 */
+	async sing(seek: number = 0, extraArgs?: any[]) {
+		if (seek < 0 || seek > this.duration) throw new Error("Seek is out of range of track");
+		const args: any[] = [
+			"-ss",
+			seek,
+			"-i",
+			(await this.bestAudio()).url,
+			// "-analyzeduration",
+			// "0",
+			// "-loglevel",
+			// "48",
+			// "-f",
+			// "opus",
+			// "-ar",
+			// "48000",
+			"-ac",
+			"2",
+		];
+		if (extraArgs) args.push(...extraArgs);
+
+		return new prism.FFmpeg({ args: args });
+	}
+
+	/**
+	 * Returns the best audio format.
+	 * **Note:** if SoundCloud is the service, `Audio.url` is changed to a time sensitive URL due to SoundCloud APIs.
+	 */
+	async bestAudio(): Promise<Audio> {
+		if (this.audio == undefined || this.audio?.length == 0)
+			throw new Error("MusicTrack does not contain any audios");
+
+		if (this.service === Service.spotify) {
+			throw new Error("Spotify does not provide streaming, thus cannot return best audio");
+		}
+
+		if (this.service === Service.soundcloud) {
+			console.log(this.audio);
+			let best = this.audio
+				.filter((a: Audio) => (a.mimeType ? a.mimeType.includes("audio/mpeg") : false))
+				.filter((a: Audio) => a.protocol?.includes("progressive"))
+				.filter((a: Audio) =>
+					a.quality
+						? a.quality.includes("sq") || a.quality.includes("medium") || a.quality.includes("low")
+						: false
+				)?.[0];
+			console.log(best);
+
+			let { data } = await axios.get(`${best.url}`).catch((err: Error) => {
+				throw err;
+			});
+
+			console.log(data);
+			return data?.url;
+		}
+
+		if (this.service === Service.youtube) {
+			return this.audio[0];
+		}
+
+		return {};
+	}
 }
 
 export class MusicPlaylist {
@@ -128,20 +217,44 @@ export class MusicPlaylist {
 	/** Name of the playlist */
 	name?: string;
 
+	/** Duration of all the tracks **in seconds** */
+	duration?: number;
+
+	/** Duration of all the tracks **in timestamp** (e.g. `12:34`) */
+	durationTimestamp?: string;
+
 	/** Is the playlist an album? */
 	isAlbum?: boolean;
 
 	/** Array of MusicTracks in playlist */
-	tracks?: Array<MusicTrack>;
+	tracks?: MusicTrack[];
 
 	/** Author of playlist. For example, a YouTube channel or SoundCloud user profile */
 	author?: Author;
 
+	/** The service providing track */
+	service?: Service;
+
+	/** Thumbnail of the playlist */
+	thumbnail?: Thumbnail;
+
+	/**
+	 * Original data retreieved from request to service's API.
+	 * There for debug and if theres any metadata not included in MusicTrack itself.
+	 */
+	originalData?: any;
+
 	constructor(data: any = {}) {
 		this.url = data.url;
 		this.name = data.name;
+		this.duration = data.duration;
+		this.durationTimestamp = getTimeFromSeconds(data.duration);
 		this.isAlbum = data.isAlbum;
 		this.tracks = data.tracks;
+		this.service = data.service;
+		this.thumbnail = data.thumbnail;
+		this.author = data.author;
+		this.originalData = data.originalData;
 	}
 }
 
@@ -149,7 +262,15 @@ export class BarbaraStream {
 	/** Readable stream */
 	stream?: Readable;
 
-	constructor(data: any = {}) {
+	/** The service providing track */
+	service?: Service;
 
+	/** URL that the stream is using */
+	url?: string;
+
+	constructor(data: any = {}) {
+		this.url = data.url;
+		this.stream = data.stream;
+		this.service = data.service;
 	}
 }

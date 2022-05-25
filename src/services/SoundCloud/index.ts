@@ -1,11 +1,57 @@
 import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../classes";
-const axios = require("axios").default;
+import axios from "axios";
 
 let clientId = "";
 
 /** URL pattern for SoundCloud - ripped from play-dl */
 const SOUNDCLOUD_URL_PATTERN =
 	/^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
+
+/** Generate MusicTrack from SoundCloud data */
+const MusicTrackFromSoundCloud = (data: any) =>
+	new MusicTrack({
+		name: data.title,
+		url: data.url,
+		duration: Number(data.duration) / 1000,
+		author: {
+			url: data?.user?.permalink_url,
+			name: data?.user?.username,
+			avatar: data?.user?.avatar_url,
+			id: data?.user?.id,
+			verified: data?.user?.verified,
+		},
+		thumbnail: { url: data.artwork_url },
+		service: Service.soundcloud,
+		audio: data.media.transcodings.map((a: any) => {
+			return {
+				url: a.url + `?client_id=${clientId}`,
+				quality: a.quality,
+				duration: a.duration,
+				protocol: a.format?.protocol,
+				mimeType: a.format?.mime_type,
+			};
+		}),
+		originalData: data,
+	});
+
+/** Generate MusicPlaylist from SoundCloud data */
+const MusicPlaylistFromSoundCloud = (data: any) =>
+	new MusicPlaylist({
+		url: data.permalink_url,
+		name: data.title,
+		duration: Number(data.duration) / 1000,
+		author: {
+			url: data?.user?.permalink_url,
+			name: data?.user?.username,
+			avatar: data?.user?.avatar_url,
+			id: data?.user?.id,
+		},
+		thumbnail: { url: data.artwork_url },
+		service: Service.soundcloud,
+		isAlbum: data.set_type == "album",
+		tracks: data.tracks.filter((t: any) => t?.title?.length > 0).map(MusicTrackFromSoundCloud),
+		originalData: data,
+	});
 
 /**
  * Returns a free client ID - ripped from play-dl
@@ -27,7 +73,7 @@ export async function getClientId(): Promise<string> {
 /**
  * Returns MusicTrack or MusicPlaylist with information from SoundCloud
  */
-export async function SoundCloud(url: string): Promise<BarbaraType> {
+export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylist> {
 	clientId = await getClientId();
 	console.log(clientId);
 
@@ -40,48 +86,55 @@ export async function SoundCloud(url: string): Promise<BarbaraType> {
 			throw err;
 		});
 
-	if (data.kind === "track") {
-		return new MusicTrack({
-			name: data.title,
-			url: data.permalink_url,
-			duration: Number(data.duration) / 1000,
-			author: {
-				url: data.user.permalink_url,
-				name: data.user.username,
-				avatar: data.user.avatar_url,
-				id: data.user.id,
-				verified: data?.user?.verified,
-			},
-			thumbnail: { url: data.artwork_url },
-			service: Service.soundcloud,
-			audio: await data.media.transcodings.map(async (a: any) => {
-				// let { data: mediaData } = await axios.get(a.url + `?client_id=${clientId}`);
-				// console.log(mediaData.url);
-				return {
-					url: a.url + `?client_id=${clientId}`,
-					quality: a.quality,
-					duration: a.duration,
-					protocol: a.format.protocol,
-					mimeType: a.format.mime_type,
-				};
-			}),
-			originalData: data,
-		});
-	} else if (data.kind === "playlist") {
-		return new MusicPlaylist({
-			name: data.title,
-			url: data.permalink_url,
-			duration: Number(data.duration) / 1000,
-			author: {
-				url: data.user.permalink_url,
-				name: data.user.username,
-				avatar: data.user.avatar_url,
-				id: data.user.id,
-			},
-			thumbnail: { url: data.artwork_url },
-			service: Service.soundcloud,
-		});
-	} else {
-		throw new Error("SoundCloud returned unknown resource");
-	}
+	if (data.kind === "track") return MusicTrackFromSoundCloud(data);
+	else if (data.kind === "playlist") return MusicPlaylistFromSoundCloud(data);
+	else throw new Error("SoundCloud returned unknown resource");
 }
+
+/**
+ * Searches for a SoundCloud track or playlist
+ */
+export async function SoundCloudSearch(
+	query: string,
+	limit: number,
+	type: "tracks" | "playlists" | "albums" = "tracks"
+): Promise<BarbaraType[]> {
+	clientId = await getClientId();
+	console.log(clientId);
+
+	let results: BarbaraType[] = [];
+	const { data } = await axios
+		.get(
+			`https://api-v2.soundcloud.com/search/${type}?q=${query}&client_id=${clientId}&limit=${limit}`
+		)
+		.catch((err: Error) => {
+			throw err;
+		});
+
+	if (type === "tracks")
+		data.collection.forEach((d: any) => results.push(MusicTrackFromSoundCloud(d)));
+	else if (type === "albums" || type === "playlists")
+		data.collection.forEach((d: any) => results.push(MusicPlaylistFromSoundCloud(d)));
+	else {
+		throw new Error("Unknown SoundCloud resource type");
+	}
+
+	return results;
+}
+
+// export async function SoundCloudStream(mt: MusicTrack) {
+// 	if (mt.service !== Service.soundcloud)
+// 		throw Error("MusicTrack service is not SoundCloud, thus cannot be streamed");
+
+// 	const HLSformats = parseHlsFormats(data.formats);
+// 	if (typeof quality !== "number") quality = HLSformats.length - 1;
+// 	else if (quality <= 0) quality = 0;
+// 	else if (quality >= HLSformats.length) quality = HLSformats.length - 1;
+// 	const req_url = HLSformats[quality].url + "?client_id=" + soundData.client_id;
+// 	console.log(req_url);
+// 	const s_data = JSON.parse(await request(req_url));
+// 	const type = HLSformats[quality].format.mime_type.startsWith("audio/ogg")
+// 		? StreamType.OggOpus
+// 		: StreamType.Arbitrary;
+// 	return new SoundCloudStream(s_data.url, type);
+// }

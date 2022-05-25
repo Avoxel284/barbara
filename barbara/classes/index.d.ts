@@ -1,3 +1,6 @@
+/// <reference types="node" />
+import { Readable } from "stream";
+import prism from "prism-media";
 export interface SearchOptions {
     service: Service;
 }
@@ -41,13 +44,26 @@ export declare class MusicTrack {
     author?: Author;
     originalData?: any;
     constructor(data?: any);
+    sing(seek?: number, extraArgs?: any[]): Promise<prism.FFmpeg>;
+    bestAudio(): Promise<Audio>;
 }
 export declare class MusicPlaylist {
     url?: string;
     name?: string;
+    duration?: number;
+    durationTimestamp?: string;
     isAlbum?: boolean;
-    tracks?: Array<MusicTrack>;
+    tracks?: MusicTrack[];
     author?: Author;
+    service?: Service;
+    thumbnail?: Thumbnail;
+    originalData?: any;
+    constructor(data?: any);
+}
+export declare class BarbaraStream {
+    stream?: Readable;
+    service?: Service;
+    url?: string;
     constructor(data?: any);
 }
 export {};
