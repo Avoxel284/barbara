@@ -197,9 +197,8 @@ export class MusicTrack {
 			let { data } = await axios.get(`${best.url}`).catch((err: Error) => {
 				throw err;
 			});
-
-			console.log(data);
-			return data?.url;
+			best.url = data.url;
+			return best;
 		}
 
 		if (this.service === Service.youtube) {
