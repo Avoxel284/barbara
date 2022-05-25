@@ -6,40 +6,40 @@ export interface InfoOptions {
 }
 export declare type BarbaraType = MusicTrack | MusicPlaylist;
 export declare enum Service {
-    spotify = 0,
-    youtube = 1,
-    soundcloud = 2,
-    audiofile = 3
-}
-declare enum AudioQuality {
-    low = 0,
-    medium = 1,
-    high = 2
+    spotify = "spotify",
+    youtube = "youtube",
+    soundcloud = "soundcloud",
+    audiofile = "audiofile"
 }
 interface Audio {
-    url: string;
-    quality: AudioQuality;
+    url?: string;
+    quality?: string;
+    duration?: number;
+    protocol?: string;
+    mimeType?: string;
 }
 interface Thumbnail {
     url: string;
 }
 interface Author {
-    url: string;
-    avatar: string;
-    name: string;
-    id: string;
+    url?: string;
+    avatar?: string;
+    name?: string;
+    id?: string;
+    verified?: boolean;
 }
 export declare class MusicTrack {
-    url?: string;
-    name?: string;
+    url: string;
+    name: string;
     queuedBy?: string;
-    duration?: number;
+    duration: number;
     durationTimestamp?: string;
-    playlisted?: boolean;
+    playlisted: boolean;
     service?: Service;
     thumbnail?: Thumbnail;
     audio?: Array<Audio>;
     author?: Author;
+    originalData?: any;
     constructor(data?: any);
 }
 export declare class MusicPlaylist {

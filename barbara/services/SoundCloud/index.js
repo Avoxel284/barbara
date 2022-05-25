@@ -31,7 +31,7 @@ async function SoundCloud(url) {
         .catch((err) => {
         throw err;
     });
-    if (data.kind == "track") {
+    if (data.kind === "track") {
         return new classes_1.MusicTrack({
             name: data.title,
             url: data.permalink_url,
@@ -41,12 +41,23 @@ async function SoundCloud(url) {
                 name: data.user.username,
                 avatar: data.user.avatar_url,
                 id: data.user.id,
+                verified: data?.user?.verified,
             },
             thumbnail: { url: data.artwork_url },
             service: classes_1.Service.soundcloud,
+            audio: await data.media.transcodings.map(async (a) => {
+                return {
+                    url: a.url + `?client_id=${clientId}`,
+                    quality: a.quality,
+                    duration: a.duration,
+                    protocol: a.format.protocol,
+                    mimeType: a.format.mime_type,
+                };
+            }),
+            originalData: data,
         });
     }
-    else if (data.kind == "playlist") {
+    else if (data.kind === "playlist") {
         return new classes_1.MusicPlaylist({
             name: data.title,
             url: data.permalink_url,

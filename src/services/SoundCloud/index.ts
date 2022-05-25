@@ -40,7 +40,7 @@ export async function SoundCloud(url: string): Promise<BarbaraType> {
 			throw err;
 		});
 
-	if (data.kind == "track") {
+	if (data.kind === "track") {
 		return new MusicTrack({
 			name: data.title,
 			url: data.permalink_url,
@@ -50,11 +50,24 @@ export async function SoundCloud(url: string): Promise<BarbaraType> {
 				name: data.user.username,
 				avatar: data.user.avatar_url,
 				id: data.user.id,
+				verified: data?.user?.verified,
 			},
 			thumbnail: { url: data.artwork_url },
 			service: Service.soundcloud,
+			audio: await data.media.transcodings.map(async (a: any) => {
+				// let { data: mediaData } = await axios.get(a.url + `?client_id=${clientId}`);
+				// console.log(mediaData.url);
+				return {
+					url: a.url + `?client_id=${clientId}`,
+					quality: a.quality,
+					duration: a.duration,
+					protocol: a.format.protocol,
+					mimeType: a.format.mime_type,
+				};
+			}),
+			originalData: data,
 		});
-	} else if (data.kind == "playlist") {
+	} else if (data.kind === "playlist") {
 		return new MusicPlaylist({
 			name: data.title,
 			url: data.permalink_url,

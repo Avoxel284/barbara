@@ -12,6 +12,11 @@ In the past, I coded a Discord bot named norikobot which used [play-dl](https://
 
 Barbara features a unified `MusicTrack` class with intuitive methods to make music-streaming Discord bots easier.
 
+## Installation
+```
+npm install barbara-music
+```
+
 ## Examples
 
 ```js
