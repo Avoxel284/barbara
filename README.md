@@ -21,3 +21,6 @@ barbara.searchTrack("never gonna give you up", barbara.yt).then((track) => {
 	const resource = discordVoice.createAudioResource(track.resource());
 });
 ```
+
+<br>
+don't ask why i picked a genshin character as the mascot
