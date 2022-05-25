@@ -1,5 +1,7 @@
 <img src="./images/Banner.png">
 
+<b> [Documentation](https://avoxel284.github.io/barbara)</b>
+
 ## WORK IN PROGRESS!
 
 Library is nowhere near finished! Please do not use.
@@ -13,6 +15,7 @@ In the past, I coded a Discord bot named norikobot which used [play-dl](https://
 Barbara features a unified `MusicTrack` class with intuitive methods to make music-streaming Discord bots easier.
 
 ## Installation
+
 ```
 npm install barbara-music
 ```
