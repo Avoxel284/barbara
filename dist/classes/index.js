@@ -38,6 +38,8 @@ class MusicTrack {
             seek,
             "-i",
             (await this.bestAudio()).url,
+            "-f",
+            "opus",
             "-ac",
             "2",
         ];

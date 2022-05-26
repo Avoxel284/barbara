@@ -2,7 +2,7 @@
 const Barbara = require("../dist");
 const Discord = require("discord.js");
 const DiscordVoice = require("@discordjs/voice");
-require("dotenv").config({ path: `${__dirname}/.env` });
+require("dotenv").config({ path: `${__dirname}\\.env` });
 
 const client = new Discord.Client({
 	intents: [
@@ -43,14 +43,19 @@ client.on("messageCreate", async (msg) => {
 		const track = search[0];
 
 		// Create a new audio resource from the track
-		const resource = DiscordVoice.createAudioResource(track.sing());
+		const resource = await DiscordVoice.createAudioResource(
+			await track.sing(1, ["-report", "-f", "opus"])
+		);
 
 		// Create a new audio player
 		const player = DiscordVoice.createAudioPlayer({
 			behaviors: {
-				noSubscriber: NoSubscriberBehavior.Play,
+				noSubscriber: DiscordVoice.NoSubscriberBehavior.Play,
 			},
 		});
+
+		console.log(resource);
+		console.log(player);
 
 		// Play the audio resource
 		player.play(resource);

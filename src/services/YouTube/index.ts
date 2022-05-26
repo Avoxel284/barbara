@@ -1,82 +1,11 @@
 import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../classes";
 import axios from "axios";
-
-let clientId = "";
-
-/** URL pattern for YouTube - ripped from play-dl */
-const SOUNDCLOUD_URL_PATTERN =
-	/^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
-
-/** Generate MusicTrack from YouTube data */
-const MusicTrackFromSoundCloud = (data: any) =>
-	new MusicTrack({
-		name: data.title,
-		url: data.url,
-		duration: Number(data.duration) / 1000,
-		author: {
-			url: data?.user?.permalink_url,
-			name: data?.user?.username,
-			avatar: data?.user?.avatar_url,
-			id: data?.user?.id,
-			verified: data?.user?.verified,
-		},
-		thumbnail: { url: data.artwork_url },
-		service: Service.soundcloud,
-		audio: data.media.transcodings.map((a: any) => {
-			return {
-				url: a.url + `?client_id=${clientId}`,
-				quality: a.quality,
-				duration: a.duration,
-				protocol: a.format?.protocol,
-				mimeType: a.format?.mime_type,
-			};
-		}),
-		originalData: data,
-	});
-
-/** Generate MusicPlaylist from SoundCloud data */
-const MusicPlaylistFromSoundCloud = (data: any) =>
-	new MusicPlaylist({
-		url: data.permalink_url,
-		name: data.title,
-		duration: Number(data.duration) / 1000,
-		author: {
-			url: data?.user?.permalink_url,
-			name: data?.user?.username,
-			avatar: data?.user?.avatar_url,
-			id: data?.user?.id,
-		},
-		thumbnail: { url: data.artwork_url },
-		service: Service.soundcloud,
-		isAlbum: data.set_type == "album",
-		tracks: data.tracks.filter((t: any) => t?.title?.length > 0).map(MusicTrackFromSoundCloud),
-		originalData: data,
-	});
+import { MusicPlaylistFromYouTube, MusicTrackFromYouTube } from "./parse";
 
 /**
- * Returns a free client ID - ripped from play-dl
+ * Returns MusicTrack or MusicPlaylist with information from YouTube
  */
-export async function getClientId(): Promise<string> {
-	const { data } = await axios.get("https://soundcloud.com/").catch((err: Error) => {
-		throw err;
-	});
-	const urls: string[] = [];
-	data.split('<script crossorigin src="').forEach((r: string) => {
-		if (r.startsWith("https")) urls.push(r.split('"')[0]);
-	});
-	const { data: data2 } = await axios.get(urls[urls.length - 1]).catch((err: Error) => {
-		throw err;
-	});
-	return data2.split(',client_id:"')[1].split('"')[0];
-}
-
-/**
- * Returns MusicTrack or MusicPlaylist with information from SoundCloud
- */
-export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylist> {
-	clientId = await getClientId();
-	console.log(clientId);
-
+export async function YouTube(url: string): Promise<MusicTrack | MusicPlaylist> {
 	url = url.trim();
 	if (!url.match(SOUNDCLOUD_URL_PATTERN))
 		throw new Error(`Given URL is not a valid SoundCloud URL`);
@@ -92,29 +21,42 @@ export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylis
 }
 
 /**
- * Searches for a SoundCloud track or playlist
+ * Searches for a YouTube video or playlist
  */
-export async function SoundCloudSearch(
+export async function YouTubeSearch(
 	query: string,
 	limit: number,
-	type: "tracks" | "playlists" | "albums" = "tracks"
+	type: "video" | "playlist" = "video"
 ): Promise<BarbaraType[]> {
-	clientId = await getClientId();
-	console.log(clientId);
-
 	let results: BarbaraType[] = [];
+	let url = `https://www.youtube.com/results?search_query=${query}`;
+
+	if (url.indexOf("&sp=") === -1) {
+		url += "&sp=";
+		switch (type) {
+			case "playlist": {
+				url += `EgIQAw%253D%253D`;
+			}
+			case "video": {
+				url += `EgIQAQ%253D%253D`;
+			}
+		}
+	}
+
 	const { data } = await axios
-		.get(
-			`https://api-v2.soundcloud.com/search/${type}?q=${query}&client_id=${clientId}&limit=${limit}`
-		)
+		.get(url, {
+			headers: { "accept-language": "en-US;q=0.9" },
+		})
 		.catch((err: Error) => {
 			throw err;
 		});
 
-	if (type === "tracks")
-		data.collection.forEach((d: any) => results.push(MusicTrackFromSoundCloud(d)));
-	else if (type === "albums" || type === "playlists")
-		data.collection.forEach((d: any) => results.push(MusicPlaylistFromSoundCloud(d)));
+	if (data.contains("Our systems have detected unusual traffic from your computer network"))
+		throw new Error("YouTube detected we're a bot");
+
+	if (type === "video") data.collection.forEach((d: any) => results.push(MusicTrackFromYouTube(d)));
+	else if (type === "playlist")
+		data.collection.forEach((d: any) => results.push(MusicPlaylistFromYouTube(d)));
 	else {
 		throw new Error("Unknown SoundCloud resource type");
 	}

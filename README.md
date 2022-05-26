@@ -11,7 +11,9 @@ Library is nowhere near finished! Please do not use.
 
 ## About
 
-In the past, I coded a Discord bot named norikobot which used [play-dl](https://github.com/play-dl/play-dl). However, while play-dl was a great library for streaming music, it was archived and is no longer maintained. Thus, I created Barbara Music. Barbara features a unified `MusicTrack` class with intuitive methods and properties to stream FFmpeg audio. Barbara was built with music-playing Discord bots in mind, especially as I use it for one of my own Discord bots, norikobot.
+In the past, I coded a Discord bot named norikobot which used [play-dl](https://github.com/play-dl/play-dl). However, while play-dl was a great library for streaming music, it was archived and is no longer maintained. Thus, I created Barbara Music. Barbara features a unified `MusicTrack` class with intuitive methods and properties to stream audio. Barbara was built with music-playing Discord bots in mind, especially as I use it for one of my own Discord bots, norikobot.
+
+Since Barbara Music uses Prism Media, Barbara creates a Prism FFmpeg object that can be used as a DiscordVoice audio resource. Because of this, audio filters can be added by passing extra arguments to FFmpeg.
 
 ## Installation
 
@@ -24,8 +26,8 @@ npm install barbara-music
 ```js
 const barbara = require("barbara-music");
 
-barbara.searchTrack("never gonna give you up", barbara.yt).then((track) => {
-	const resource = discordVoice.createAudioResource(track.resource());
+barbara.searchTrack("never gonna give you up", barbara.yt).then(async (track) => {
+	const resource = discordVoice.createAudioResource(await track.sing());
 });
 ```
 

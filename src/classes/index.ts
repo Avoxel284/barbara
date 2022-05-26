@@ -153,8 +153,6 @@ export class MusicTrack {
 	 * @param extraArgs An array of extra arguments to pass to Prism when creating the FFmpeg object.
 	 * Basically just your standarad FFmpeg arguments but in array form. For example:
 	 * ```
-	 * "-f",
-	 * "opus",
 	 * "-ar",
 	 * "48000",
 	 * "-ac",
@@ -172,8 +170,8 @@ export class MusicTrack {
 			// "0",
 			// "-loglevel",
 			// "48",
-			// "-f",
-			// "opus",
+			"-f",
+			"opus",
 			// "-ar",
 			// "48000",
 			"-ac",

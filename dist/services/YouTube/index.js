@@ -3,69 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SoundCloudSearch = exports.SoundCloud = exports.getClientId = void 0;
-const classes_1 = require("../../classes");
+exports.YouTubeSearch = exports.YouTube = void 0;
 const axios_1 = __importDefault(require("axios"));
-let clientId = "";
-const SOUNDCLOUD_URL_PATTERN = /^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
-const MusicTrackFromSoundCloud = (data) => new classes_1.MusicTrack({
-    name: data.title,
-    url: data.url,
-    duration: Number(data.duration) / 1000,
-    author: {
-        url: data?.user?.permalink_url,
-        name: data?.user?.username,
-        avatar: data?.user?.avatar_url,
-        id: data?.user?.id,
-        verified: data?.user?.verified,
-    },
-    thumbnail: { url: data.artwork_url },
-    service: classes_1.Service.soundcloud,
-    audio: data.media.transcodings.map((a) => {
-        return {
-            url: a.url + `?client_id=${clientId}`,
-            quality: a.quality,
-            duration: a.duration,
-            protocol: a.format?.protocol,
-            mimeType: a.format?.mime_type,
-        };
-    }),
-    originalData: data,
-});
-const MusicPlaylistFromSoundCloud = (data) => new classes_1.MusicPlaylist({
-    url: data.permalink_url,
-    name: data.title,
-    duration: Number(data.duration) / 1000,
-    author: {
-        url: data?.user?.permalink_url,
-        name: data?.user?.username,
-        avatar: data?.user?.avatar_url,
-        id: data?.user?.id,
-    },
-    thumbnail: { url: data.artwork_url },
-    service: classes_1.Service.soundcloud,
-    isAlbum: data.set_type == "album",
-    tracks: data.tracks.filter((t) => t?.title?.length > 0).map(MusicTrackFromSoundCloud),
-    originalData: data,
-});
-async function getClientId() {
-    const { data } = await axios_1.default.get("https://soundcloud.com/").catch((err) => {
-        throw err;
-    });
-    const urls = [];
-    data.split('<script crossorigin src="').forEach((r) => {
-        if (r.startsWith("https"))
-            urls.push(r.split('"')[0]);
-    });
-    const { data: data2 } = await axios_1.default.get(urls[urls.length - 1]).catch((err) => {
-        throw err;
-    });
-    return data2.split(',client_id:"')[1].split('"')[0];
-}
-exports.getClientId = getClientId;
-async function SoundCloud(url) {
-    clientId = await getClientId();
-    console.log(clientId);
+const parse_1 = require("./parse");
+async function YouTube(url) {
     url = url.trim();
     if (!url.match(SOUNDCLOUD_URL_PATTERN))
         throw new Error(`Given URL is not a valid SoundCloud URL`);
@@ -81,24 +22,38 @@ async function SoundCloud(url) {
     else
         throw new Error("SoundCloud returned unknown resource");
 }
-exports.SoundCloud = SoundCloud;
-async function SoundCloudSearch(query, limit, type = "tracks") {
-    clientId = await getClientId();
-    console.log(clientId);
+exports.YouTube = YouTube;
+async function YouTubeSearch(query, limit, type = "video") {
     let results = [];
+    let url = `https://www.youtube.com/results?search_query=${query}`;
+    if (url.indexOf("&sp=") === -1) {
+        url += "&sp=";
+        switch (type) {
+            case "playlist": {
+                url += `EgIQAw%253D%253D`;
+            }
+            case "video": {
+                url += `EgIQAQ%253D%253D`;
+            }
+        }
+    }
     const { data } = await axios_1.default
-        .get(`https://api-v2.soundcloud.com/search/${type}?q=${query}&client_id=${clientId}&limit=${limit}`)
+        .get(url, {
+        headers: { "accept-language": "en-US;q=0.9" },
+    })
         .catch((err) => {
         throw err;
     });
-    if (type === "tracks")
-        data.collection.forEach((d) => results.push(MusicTrackFromSoundCloud(d)));
-    else if (type === "albums" || type === "playlists")
-        data.collection.forEach((d) => results.push(MusicPlaylistFromSoundCloud(d)));
+    if (data.contains("Our systems have detected unusual traffic from your computer network"))
+        throw new Error("YouTube detected we're a bot");
+    if (type === "video")
+        data.collection.forEach((d) => results.push((0, parse_1.MusicTrackFromYouTube)(d)));
+    else if (type === "playlist")
+        data.collection.forEach((d) => results.push((0, parse_1.MusicPlaylistFromYouTube)(d)));
     else {
         throw new Error("Unknown SoundCloud resource type");
     }
     return results;
 }
-exports.SoundCloudSearch = SoundCloudSearch;
+exports.YouTubeSearch = YouTubeSearch;
 //# sourceMappingURL=index.js.map
