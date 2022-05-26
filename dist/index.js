@@ -7,8 +7,10 @@ Object.defineProperty(exports, "Service", { enumerable: true, get: function () {
 const SoundCloud_1 = require("./services/SoundCloud");
 Object.defineProperty(exports, "SoundCloud", { enumerable: true, get: function () { return SoundCloud_1.SoundCloud; } });
 Object.defineProperty(exports, "SoundCloudSearch", { enumerable: true, get: function () { return SoundCloud_1.SoundCloudSearch; } });
-async function search(keywords, options) {
-    return keywords;
+async function search(query, options) {
+    if (options.service === classes_1.Service.soundcloud) {
+        return await (0, SoundCloud_1.SoundCloudSearch)(query, options.limit, options.type);
+    }
 }
 exports.search = search;
 async function info(url, options) { }

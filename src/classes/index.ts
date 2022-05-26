@@ -9,6 +9,13 @@ let clientId = getKey("soundcloudClientId");
 export interface SearchOptions {
 	/** Service to search track on */
 	service: Service;
+	/** Maximum results to return */
+	limit: number;
+	/**
+	 * Type of results to return
+	 * In the case of YouTube, `tracks` are videos, `playlists` are playlists and `albums` are.. not a thing
+	 */
+	type: "tracks" | "playlists" | "albums";
 }
 
 export interface InfoOptions {
@@ -102,7 +109,14 @@ export class MusicTrack {
 	/**
 	 * An object that represents a music track
 	 *
-	 * @param {Object} data Internal data parameter, will come back to this later
+	 * @param {Object} data An object containing data. Reference below:
+	 * ```
+	 * url: Public URL
+	 * name: Track name
+	 * thumbnail: Thumbnail object { url: Thumbnail URL }
+	 * queuedBy: Who queued the track
+	 * duration
+	 * ```
 	 * @example
 	 * ```
 	 * let Track = new MusicTrack();
@@ -136,7 +150,7 @@ export class MusicTrack {
 	 * ```
 	 *
 	 * @param seek Number of seconds to seek in the track. Obviously defaults to 0
-	 * @param extraArgs An array of extra arguments to pass to Prism when creating the FFmpeg object
+	 * @param extraArgs An array of extra arguments to pass to Prism when creating the FFmpeg object.
 	 * Basically just your standarad FFmpeg arguments but in array form. For example:
 	 * ```
 	 * "-f",

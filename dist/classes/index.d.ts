@@ -3,6 +3,8 @@ import { Readable } from "stream";
 import prism from "prism-media";
 export interface SearchOptions {
     service: Service;
+    limit: number;
+    type: "tracks" | "playlists" | "albums";
 }
 export interface InfoOptions {
     length: number;

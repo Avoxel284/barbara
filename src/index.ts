@@ -3,10 +3,16 @@ import { SoundCloud, SoundCloudSearch } from "./services/SoundCloud";
 
 /**
  * Searches given keywords on YouTube, unless other service is specified in search options.
+ *
+ * @param query Search query
+ * @param options Search options
  * @returns Array of MusicTrack objects
  */
-export async function search(keywords: string, options: SearchOptions) {
-	return keywords;
+export async function search(query: string, options: SearchOptions) {
+	if (options.service === Service.soundcloud) {
+		return await SoundCloudSearch(query, options.limit, options.type);
+	}
+	// return query;
 }
 
 /**
