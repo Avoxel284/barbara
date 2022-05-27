@@ -11,6 +11,11 @@ export function MusicTrackFromYouTube(data: any) {
 	const channel = data.videoRenderer.ownerText.runs[0];
 	const badge = data.videoRenderer.ownerBadges?.[0]?.metadataBadgeRenderer?.style?.toLowerCase();
 	const duration = data.videoRenderer.lengthText;
+	const thumbnail =
+		data.videoRenderer.thumbnail.thumbnails[data.videoRenderer.thumbnail.thumbnails - 1];
+	const avatar =
+		data.videoRenderer.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail
+			.thumbnails[0];
 
 	return new MusicTrack({
 		url: `https://www.youtube.com/watch?v=${data.videoRenderer.videoId}`,
@@ -21,29 +26,27 @@ export function MusicTrackFromYouTube(data: any) {
 		// 			.map((run: any) => run.text)
 		// 			.join("")
 		// 	: "",
-		duration: duration ? duration.simpleText : null,
+		duration: duration ? duration.simpleText : null, // TODO: invert
 		durationTimestamp: duration ? getTimeFromSeconds(duration.simpleText) : 0,
-		thumbnails: data.videoRenderer.thumbnail.thumbnails,
-		channel: {
+		thumbnail: { url: thumbnail },
+		author: {
 			id: channel.navigationEndpoint.browseEndpoint.browseId || null,
 			name: channel.text || null,
 			url: `https://www.youtube.com${
 				channel.navigationEndpoint.browseEndpoint.canonicalBaseUrl ||
 				channel.navigationEndpoint.commandMetadata.webCommandMetadata.url
 			}`,
-			icons:
-				data.videoRenderer.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer
-					.thumbnail.thumbnails,
-			verified: Boolean(badge?.includes("verified")),
-			artist: Boolean(badge?.includes("artist")),
+			avatar: avatar,
 		},
-		uploadedAt: data.videoRenderer.publishedTimeText?.simpleText ?? null,
-		upcoming: data.videoRenderer.upcomingEventData?.startTime
-			? new Date(parseInt(data.videoRenderer.upcomingEventData.startTime) * 1000)
-			: undefined,
-		views: data.videoRenderer.viewCountText?.simpleText?.replace(/\D/g, "") ?? 0,
 		live: duration ? false : true,
+		originalData: data,
 	});
 }
 
-export function MusicPlaylistFromYouTube(data: any) {}
+/**
+ * Parse a MusicPlaylist from YouTube data.
+ * Some code was ripped from play-dl 
+ */
+export function MusicPlaylistFromYouTube(data: any) {
+	
+}

@@ -51,11 +51,6 @@ interface Audio {
 	mimeType?: string;
 }
 
-interface Thumbnail {
-	/** Thumbnail URL */
-	url: string;
-}
-
 interface Author {
 	/** Public page URL */
 	url?: string;
@@ -88,14 +83,17 @@ export class MusicTrack {
 	/** Duration of the track **in timestamp** (e.g. `12:34`) */
 	durationTimestamp?: string;
 
+	/** Is the track live-streaming? (e.g. a YouTube livestream) */
+	live: boolean;
+
 	/** Has the track been playlisted? */
 	playlisted: boolean;
 
-	/** The service providing track */
+	/** The service providing track (e.g. YouTube) */
 	service?: Service;
 
-	/** Thumbnail of the track */
-	thumbnail?: Thumbnail;
+	/** Thumbnail URL of the track */
+	thumbnail?: string;
 
 	/** Array of media urls */
 	audio?: Array<Audio>;
@@ -136,6 +134,7 @@ export class MusicTrack {
 		this.queuedBy = data.queuedBy;
 		this.duration = data.duration || 0;
 		this.durationTimestamp = getTimeFromSeconds(data.duration || 0);
+		this.live = data.live;
 		this.playlisted = data.playlisted || false;
 		this.service = data.service;
 		this.audio = data.audio;

@@ -1,7 +1,7 @@
 import { YouTubeVideo } from "../classes/Video";
 import { YouTubePlayList } from "../classes/Playlist";
 import { YouTubeChannel } from "../classes/Channel";
-import { YouTube } from "..";
+import { YouTube } from "../dist";
 import { YouTubeThumbnail } from "../classes/Thumbnail";
 
 const BLURRED_THUMBNAILS = [

@@ -3,25 +3,24 @@ import axios from "axios";
 import { MusicPlaylistFromYouTube, MusicTrackFromYouTube } from "./parse";
 
 /**
- * Returns MusicTrack or MusicPlaylist with information from YouTube
+ * Returns {@link MusicTrack} or {@link MusicPlaylist} from a given YouTube URL
  */
 export async function YouTube(url: string): Promise<MusicTrack | MusicPlaylist> {
 	url = url.trim();
-	if (!url.match(SOUNDCLOUD_URL_PATTERN))
-		throw new Error(`Given URL is not a valid SoundCloud URL`);
+	if (!url.match(YOUTUBE_URL_PATTERN)) throw new Error(`Given URL is not a valid SoundCloud URL`);
 	const { data } = await axios
 		.get(`https://api-v2.soundcloud.com/resolve?url=${url}&client_id=${clientId}`)
 		.catch((err: Error) => {
 			throw err;
 		});
 
-	if (data.kind === "track") return MusicTrackFromSoundCloud(data);
-	else if (data.kind === "playlist") return MusicPlaylistFromSoundCloud(data);
-	else throw new Error("SoundCloud returned unknown resource");
+	if (data.kind === "track") return MusicTrackFromYouTube(data);
+	else if (data.kind === "playlist") return MusicPlaylistFromYouTube(data);
+	else throw new Error("YouTube returned unknown resource or nothing");
 }
 
 /**
- * Searches for a YouTube video or playlist
+ * Searches for a YouTube video or playlist and returns an array of {@link MusicTrack} or {@link MusicPlaylist}
  */
 export async function YouTubeSearch(
 	query: string,
@@ -58,7 +57,7 @@ export async function YouTubeSearch(
 	else if (type === "playlist")
 		data.collection.forEach((d: any) => results.push(MusicPlaylistFromYouTube(d)));
 	else {
-		throw new Error("Unknown SoundCloud resource type");
+		throw new Error("YouTube returned unknown resource or nothing");
 	}
 
 	return results;
