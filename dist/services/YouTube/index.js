@@ -6,26 +6,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.YouTubeSearch = exports.YouTube = void 0;
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
+const config_1 = require("../../config");
 async function YouTube(url) {
     url = url.trim();
-    if (!url.match(SOUNDCLOUD_URL_PATTERN))
-        throw new Error(`Given URL is not a valid SoundCloud URL`);
-    const { data } = await axios_1.default
-        .get(`https://api-v2.soundcloud.com/resolve?url=${url}&client_id=${clientId}`)
+    let videoId;
+    if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1].split(/(\?|\/|&)/)[0];
+    }
+    else if (url.includes("youtube.com/embed/")) {
+        videoId = url.split("youtube.com/embed/")[1].split(/(\?|\/|&)/)[0];
+    }
+    else if (url.includes("youtube.com/shorts/")) {
+        videoId = url.split("youtube.com/shorts/")[1].split(/(\?|\/|&)/)[0];
+    }
+    else {
+        videoId = (url.split("watch?v=")[1] ?? url.split("&v=")[1]).split(/(\?|\/|&)/)[0];
+    }
+    if (!videoId)
+        throw new Error("Given URL is not a valid YouTube URL");
+    const { data: html } = await axios_1.default
+        .get(`https://www.youtube.com/watch?v=${videoId}&has_verified=1`, {
+        headers: {
+            "accept-language": "en-US;q=0.9",
+            Cookie: "",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
+        },
+    })
         .catch((err) => {
         throw err;
     });
-    if (data.kind === "track")
-        return MusicTrackFromSoundCloud(data);
-    else if (data.kind === "playlist")
-        return MusicPlaylistFromSoundCloud(data);
-    else
-        throw new Error("SoundCloud returned unknown resource");
+    if (html.includes("Our systems have detected unusual traffic from your computer network."))
+        throw new Error("YouTube detected we're a bot.. thanks youtube.");
+    return (0, parse_1.MusicTrackFromYouTube)(html);
 }
 exports.YouTube = YouTube;
 async function YouTubeSearch(query, limit, type = "video") {
     let results = [];
-    let url = `https://www.youtube.com/results?search_query=${query}`;
+    let url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
     if (url.indexOf("&sp=") === -1) {
         url += "&sp=";
         switch (type) {
@@ -37,22 +54,48 @@ async function YouTubeSearch(query, limit, type = "video") {
             }
         }
     }
-    const { data } = await axios_1.default
+    console.log(url);
+    const { data: html } = await axios_1.default
         .get(url, {
         headers: { "accept-language": "en-US;q=0.9" },
     })
         .catch((err) => {
         throw err;
     });
-    if (data.contains("Our systems have detected unusual traffic from your computer network"))
+    if (html.includes("Our systems have detected unusual traffic from your computer network"))
         throw new Error("YouTube detected we're a bot");
-    if (type === "video")
-        data.collection.forEach((d) => results.push((0, parse_1.MusicTrackFromYouTube)(d)));
-    else if (type === "playlist")
-        data.collection.forEach((d) => results.push((0, parse_1.MusicPlaylistFromYouTube)(d)));
-    else {
-        throw new Error("Unknown SoundCloud resource type");
+    const data = JSON.parse(html
+        .split("var ytInitialData = ")?.[1]
+        ?.split(";</script>")[0]
+        .split(/;\s*(var|const|let)\s/)[0]);
+    const items = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.flatMap((s) => s.itemSectionRenderer?.contents);
+    for (const item of items) {
+        if (limit && results.length >= limit)
+            break;
+        if (!item || (!item.videoRenderer && !item.channelRenderer && !item.playlistRenderer))
+            continue;
+        if ((0, config_1.isDebug)())
+            console.log(type);
+        switch (type) {
+            case "video": {
+                const result = (0, parse_1.MusicTrackFromYouTubeSearch)(item);
+                if (result)
+                    results.push(result);
+                break;
+            }
+            case "playlist": {
+                const result = (0, parse_1.MusicPlaylistFromYouTube)(item);
+                if (result)
+                    results.push(result);
+                break;
+            }
+            default:
+                throw new Error("Unknown type");
+                break;
+        }
     }
+    if ((0, config_1.isDebug)())
+        console.log(results);
     return results;
 }
 exports.YouTubeSearch = YouTubeSearch;

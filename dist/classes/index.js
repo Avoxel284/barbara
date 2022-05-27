@@ -7,8 +7,8 @@ exports.BarbaraStream = exports.MusicPlaylist = exports.MusicTrack = exports.Ser
 const util_1 = require("../util");
 const prism_media_1 = __importDefault(require("prism-media"));
 const axios_1 = __importDefault(require("axios"));
-const auth_1 = require("../auth");
-let clientId = (0, auth_1.getKey)("soundcloudClientId");
+const config_1 = require("../config");
+let clientId = (0, config_1.getKey)("soundcloudClientId");
 var Service;
 (function (Service) {
     Service["spotify"] = "spotify";
@@ -20,10 +20,12 @@ class MusicTrack {
     constructor(data = {}) {
         this.url = data.url || "";
         this.name = data.name || "Unnamed MusicTrack";
+        this.id = data.id;
         this.thumbnail = data.thumbnail;
         this.queuedBy = data.queuedBy;
         this.duration = data.duration || 0;
         this.durationTimestamp = (0, util_1.getTimeFromSeconds)(data.duration || 0);
+        this.live = data.live;
         this.playlisted = data.playlisted || false;
         this.service = data.service;
         this.audio = data.audio;
@@ -54,14 +56,16 @@ class MusicTrack {
             throw new Error("Spotify does not provide streaming, thus cannot return best audio");
         }
         if (this.service === Service.soundcloud) {
-            console.log(this.audio);
+            if ((0, config_1.isDebug)())
+                console.log(this.audio);
             let best = this.audio
                 .filter((a) => (a.mimeType ? a.mimeType.includes("audio/mpeg") : false))
                 .filter((a) => a.protocol?.includes("progressive"))
                 .filter((a) => a.quality
                 ? a.quality.includes("sq") || a.quality.includes("medium") || a.quality.includes("low")
                 : false)?.[0];
-            console.log(best);
+            if ((0, config_1.isDebug)())
+                console.log(best);
             let { data } = await axios_1.default.get(`${best.url}`).catch((err) => {
                 throw err;
             });
@@ -72,6 +76,10 @@ class MusicTrack {
             return this.audio[0];
         }
         return {};
+    }
+    async fetchFullTrack() {
+        if (this.service === Service.youtube) {
+        }
     }
 }
 exports.MusicTrack = MusicTrack;

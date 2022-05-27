@@ -1,6 +1,6 @@
 {
 	"name": "barbara-music",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "A music playing module for Discord Bots. Used by Norikobot",
 	"main": "dist/index",
 	"scripts": {

@@ -26,3 +26,25 @@ export function getTimeFromSeconds(time: number) {
 	ret += "" + secs;
 	return ret;
 }
+
+/**
+ * Returns seconds from a given timestamp such as `3:10`, `45:32` or `132:44:19`
+ */
+export function getSecondsFromTime(time: string) {
+	if (!time) return 0;
+	const args = time.split(":");
+
+	switch (args.length) {
+		case 3:
+			return parseInt(args[0]) * 60 * 60 + parseInt(args[1]) * 60 + parseInt(args[2]);
+			break;
+
+		case 2:
+			return parseInt(args[0]) * 60 + parseInt(args[1]);
+			break;
+
+		default:
+			return parseInt(args[0]);
+			break;
+	}
+}

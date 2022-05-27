@@ -2,7 +2,7 @@ import { Readable } from "stream";
 import { getTimeFromSeconds } from "../util";
 import prism from "prism-media";
 import axios from "axios";
-import { getKey } from "../auth";
+import { getKey, isDebug } from "../config";
 
 let clientId = getKey("soundcloudClientId");
 
@@ -38,7 +38,7 @@ export enum Service {
 }
 
 /** An audio format */
-interface Audio {
+export interface Audio {
 	/** Audio URL */
 	url?: string;
 	/** Audio quality */
@@ -198,7 +198,7 @@ export class MusicTrack {
 		}
 
 		if (this.service === Service.soundcloud) {
-			console.log(this.audio);
+			if (isDebug()) console.log(this.audio);
 			let best = this.audio
 				.filter((a: Audio) => (a.mimeType ? a.mimeType.includes("audio/mpeg") : false))
 				.filter((a: Audio) => a.protocol?.includes("progressive"))
@@ -207,7 +207,7 @@ export class MusicTrack {
 						? a.quality.includes("sq") || a.quality.includes("medium") || a.quality.includes("low")
 						: false
 				)?.[0];
-			console.log(best);
+			if (isDebug()) console.log(best);
 
 			let { data } = await axios.get(`${best.url}`).catch((err: Error) => {
 				throw err;
@@ -221,6 +221,14 @@ export class MusicTrack {
 		}
 
 		return {};
+	}
+
+	/**
+	 * Checks the track for missing data and fetches it. Useful for YouTube searches where the data doesn't return audios
+	 */
+	async fetchFullTrack() {
+		if (this.service === Service.youtube) {
+		}
 	}
 }
 
@@ -250,7 +258,7 @@ export class MusicPlaylist {
 	service?: Service;
 
 	/** Thumbnail of the playlist */
-	thumbnail?: Thumbnail;
+	thumbnail?: string;
 
 	/**
 	 * Original data retreieved from request to service's API.

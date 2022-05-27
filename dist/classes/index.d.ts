@@ -16,15 +16,12 @@ export declare enum Service {
     soundcloud = "soundcloud",
     audiofile = "audiofile"
 }
-interface Audio {
+export interface Audio {
     url?: string;
     quality?: string;
     duration?: number;
     protocol?: string;
     mimeType?: string;
-}
-interface Thumbnail {
-    url: string;
 }
 interface Author {
     url?: string;
@@ -36,18 +33,21 @@ interface Author {
 export declare class MusicTrack {
     url: string;
     name: string;
+    id: string;
     queuedBy?: string;
     duration: number;
     durationTimestamp?: string;
+    live: boolean;
     playlisted: boolean;
     service?: Service;
-    thumbnail?: Thumbnail;
+    thumbnail?: string;
     audio?: Array<Audio>;
     author?: Author;
     originalData?: any;
     constructor(data?: any);
     sing(seek?: number, extraArgs?: any[]): Promise<prism.FFmpeg>;
     bestAudio(): Promise<Audio>;
+    fetchFullTrack(): Promise<void>;
 }
 export declare class MusicPlaylist {
     url?: string;
@@ -58,7 +58,7 @@ export declare class MusicPlaylist {
     tracks?: MusicTrack[];
     author?: Author;
     service?: Service;
-    thumbnail?: Thumbnail;
+    thumbnail?: string;
     originalData?: any;
     constructor(data?: any);
 }

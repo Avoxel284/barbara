@@ -1,57 +1,12 @@
 import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../classes";
 import axios from "axios";
+import { MusicTrackFromSoundCloud, MusicPlaylistFromSoundCloud } from "./parse";
 
 let clientId = "";
 
 /** URL pattern for SoundCloud - ripped from play-dl */
 const SOUNDCLOUD_URL_PATTERN =
 	/^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
-
-/** Generate MusicTrack from SoundCloud data */
-const MusicTrackFromSoundCloud = (data: any) =>
-	new MusicTrack({
-		name: data.title,
-		url: data.url,
-		duration: Number(data.duration) / 1000,
-		author: {
-			url: data?.user?.permalink_url,
-			name: data?.user?.username,
-			avatar: data?.user?.avatar_url,
-			id: data?.user?.id,
-			verified: data?.user?.verified,
-		},
-		thumbnail: { url: data.artwork_url },
-		service: Service.soundcloud,
-		audio: data.media.transcodings.map((a: any) => {
-			return {
-				url: a.url + `?client_id=${clientId}`,
-				quality: a.quality,
-				duration: a.duration,
-				protocol: a.format?.protocol,
-				mimeType: a.format?.mime_type,
-			};
-		}),
-		originalData: data,
-	});
-
-/** Generate MusicPlaylist from SoundCloud data */
-const MusicPlaylistFromSoundCloud = (data: any) =>
-	new MusicPlaylist({
-		url: data.permalink_url,
-		name: data.title,
-		duration: Number(data.duration) / 1000,
-		author: {
-			url: data?.user?.permalink_url,
-			name: data?.user?.username,
-			avatar: data?.user?.avatar_url,
-			id: data?.user?.id,
-		},
-		thumbnail: { url: data.artwork_url },
-		service: Service.soundcloud,
-		isAlbum: data.set_type == "album",
-		tracks: data.tracks.filter((t: any) => t?.title?.length > 0).map(MusicTrackFromSoundCloud),
-		originalData: data,
-	});
 
 /**
  * Returns a free client ID - ripped from play-dl
