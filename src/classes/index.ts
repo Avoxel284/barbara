@@ -76,6 +76,9 @@ export class MusicTrack {
 	/** Name of the track */
 	name: string;
 
+	/** ID of the track (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ --> `dQw4w9WgXcQ`) */
+	id: string;
+
 	/** ID of user that queued/played the track */
 	queuedBy?: string;
 
@@ -128,6 +131,7 @@ export class MusicTrack {
 	constructor(data: any = {}) {
 		this.url = data.url || "";
 		this.name = data.name || "Unnamed MusicTrack";
+		this.id = data.id;
 		this.thumbnail = data.thumbnail;
 		this.queuedBy = data.queuedBy;
 		this.duration = data.duration || 0;
