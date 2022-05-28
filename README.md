@@ -25,6 +25,17 @@ npm install barbara-music
 
 ## Examples
 
+Note: Barbara must be authenticated before use!
+Authentication can be done very easily:
+
+```js
+const barbara = require("barbara-music");
+
+barbara.setKey("SOUNDCLOUD_CLIENTID", await barbara.freeKey("SOUNDCLOUD_CLIENTID"));
+```
+
+Further documentation will be added later
+
 ```js
 const barbara = require("barbara-music");
 
@@ -43,4 +54,3 @@ I chose the name "Barbara" since the character, Barbara, from the video game, Ge
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a>
 
 The code in this package is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-

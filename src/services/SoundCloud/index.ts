@@ -32,7 +32,7 @@ export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylis
  */
 export async function SoundCloudSearch(
 	query: string,
-	limit: number,
+	limit: number = 5,
 	type: "tracks" | "playlists" | "albums" = "tracks"
 ): Promise<BarbaraType[]> {
 	let clientId = await getKey("SOUNDCLOUD_CLIENTID");

@@ -26,7 +26,7 @@ async function SoundCloud(url) {
         throw new Error("SoundCloud returned unknown resource");
 }
 exports.SoundCloud = SoundCloud;
-async function SoundCloudSearch(query, limit, type = "tracks") {
+async function SoundCloudSearch(query, limit = 5, type = "tracks") {
     let clientId = await (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
     console.log(clientId);
     let results = [];
