@@ -34,7 +34,7 @@ export declare class MusicTrack {
     url: string;
     name: string;
     id: string;
-    queuedBy?: string;
+    queuedBy?: any;
     duration: number;
     durationTimestamp?: string;
     live: boolean;
@@ -47,6 +47,7 @@ export declare class MusicTrack {
     constructor(data?: any);
     sing(seek?: number, extraArgs?: any[]): Promise<prism.FFmpeg>;
     bestAudio(): Promise<Audio>;
+    setQueuedBy(queuedBy: any): void;
     fetchFullTrack(): Promise<void>;
 }
 export declare class MusicPlaylist {

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SoundCloudSearch = exports.SoundCloud = exports.getClientId = void 0;
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
+const config_1 = require("../../config");
 let clientId = "";
 const SOUNDCLOUD_URL_PATTERN = /^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
 async function getClientId() {
@@ -24,8 +25,7 @@ async function getClientId() {
 }
 exports.getClientId = getClientId;
 async function SoundCloud(url) {
-    clientId = await getClientId();
-    console.log(clientId);
+    clientId = await (0, config_1.getKey)("soundcloudClientId");
     url = url.trim();
     if (!url.match(SOUNDCLOUD_URL_PATTERN))
         throw new Error(`Given URL is not a valid SoundCloud URL`);
@@ -43,7 +43,7 @@ async function SoundCloud(url) {
 }
 exports.SoundCloud = SoundCloud;
 async function SoundCloudSearch(query, limit, type = "tracks") {
-    clientId = await getClientId();
+    clientId = await (0, config_1.getKey)("soundcloudClientId");
     console.log(clientId);
     let results = [];
     const { data } = await axios_1.default

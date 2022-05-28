@@ -74,8 +74,8 @@ export class MusicTrack {
 	/** ID of the track (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ --> `dQw4w9WgXcQ`) */
 	id: string;
 
-	/** ID of user that queued/played the track */
-	queuedBy?: string;
+	/** Reference of user that queued/played the track (for example a Discord user's ID) */
+	queuedBy?: any;
 
 	/** Duration of the track **in seconds** */
 	duration: number;
@@ -221,6 +221,13 @@ export class MusicTrack {
 		}
 
 		return {};
+	}
+
+	/**
+	 * Set who queued the track, for example the user's Discord ID
+	 */
+	setQueuedBy(queuedBy: any) {
+		this.queuedBy = queuedBy;
 	}
 
 	/**

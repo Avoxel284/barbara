@@ -7,7 +7,8 @@ function MusicTrackFromSoundCloud(data) {
     const clientId = (0, config_1.getKey)("soundcloudClientId");
     return new classes_1.MusicTrack({
         name: data.title,
-        url: data.url,
+        url: data.url || data.permalink_url,
+        id: data.id,
         duration: Number(data.duration) / 1000,
         author: {
             url: data?.user?.permalink_url,
@@ -34,8 +35,9 @@ exports.MusicTrackFromSoundCloud = MusicTrackFromSoundCloud;
 function MusicPlaylistFromSoundCloud(data) {
     const clientId = (0, config_1.getKey)("soundcloudClientId");
     return new classes_1.MusicPlaylist({
-        url: data.permalink_url,
         name: data.title,
+        url: data.url || data.permalink_url,
+        id: data.id,
         duration: Number(data.duration) / 1000,
         author: {
             url: data?.user?.permalink_url,

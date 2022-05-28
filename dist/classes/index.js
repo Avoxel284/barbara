@@ -77,6 +77,9 @@ class MusicTrack {
         }
         return {};
     }
+    setQueuedBy(queuedBy) {
+        this.queuedBy = queuedBy;
+    }
     async fetchFullTrack() {
         if (this.service === Service.youtube) {
         }

@@ -1,6 +1,7 @@
 import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../classes";
 import axios from "axios";
 import { MusicTrackFromSoundCloud, MusicPlaylistFromSoundCloud } from "./parse";
+import { getKey } from "../../config";
 
 let clientId = "";
 
@@ -29,8 +30,7 @@ export async function getClientId(): Promise<string> {
  * Returns MusicTrack or MusicPlaylist with information from SoundCloud
  */
 export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylist> {
-	clientId = await getClientId();
-	console.log(clientId);
+	clientId = await getKey("soundcloudClientId");
 
 	url = url.trim();
 	if (!url.match(SOUNDCLOUD_URL_PATTERN))
@@ -54,7 +54,7 @@ export async function SoundCloudSearch(
 	limit: number,
 	type: "tracks" | "playlists" | "albums" = "tracks"
 ): Promise<BarbaraType[]> {
-	clientId = await getClientId();
+	clientId = await getKey("soundcloudClientId");
 	console.log(clientId);
 
 	let results: BarbaraType[] = [];

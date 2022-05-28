@@ -13,7 +13,6 @@ export async function search(query: string, options: SearchOptions) {
 	if (options.service === Service.soundcloud) {
 		return await SoundCloudSearch(query, options.limit, options.type);
 	}
-	// return query;
 }
 
 /**
@@ -24,4 +23,4 @@ export async function info(url: string, options: InfoOptions) {}
 
 export { MusicTrack, SearchOptions, Service };
 export { SoundCloud, SoundCloudSearch };
-export { YouTube, YouTubeSearch };
+// export { YouTube, YouTubeSearch };

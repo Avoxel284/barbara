@@ -6,7 +6,8 @@ export function MusicTrackFromSoundCloud(data: any) {
 
 	return new MusicTrack({
 		name: data.title,
-		url: data.url,
+		url: data.url || data.permalink_url,
+		id: data.id,
 		duration: Number(data.duration) / 1000,
 		author: {
 			url: data?.user?.permalink_url,
@@ -34,8 +35,9 @@ export function MusicPlaylistFromSoundCloud(data: any) {
 	const clientId = getKey("soundcloudClientId");
 
 	return new MusicPlaylist({
-		url: data.permalink_url,
 		name: data.title,
+		url: data.url || data.permalink_url,
+		id: data.id,
 		duration: Number(data.duration) / 1000,
 		author: {
 			url: data?.user?.permalink_url,
