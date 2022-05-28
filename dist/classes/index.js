@@ -8,7 +8,6 @@ const util_1 = require("../util");
 const prism_media_1 = __importDefault(require("prism-media"));
 const axios_1 = __importDefault(require("axios"));
 const config_1 = require("../config");
-let clientId = (0, config_1.getKey)("soundcloudClientId");
 var Service;
 (function (Service) {
     Service["spotify"] = "spotify";
@@ -25,7 +24,7 @@ class MusicTrack {
         this.queuedBy = data.queuedBy;
         this.duration = data.duration || 0;
         this.durationTimestamp = (0, util_1.getTimeFromSeconds)(data.duration || 0);
-        this.live = data.live;
+        this.live = data.live || false;
         this.playlisted = data.playlisted || false;
         this.service = data.service;
         this.audio = data.audio;

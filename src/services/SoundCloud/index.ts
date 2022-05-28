@@ -3,34 +3,15 @@ import axios from "axios";
 import { MusicTrackFromSoundCloud, MusicPlaylistFromSoundCloud } from "./parse";
 import { getKey } from "../../config";
 
-let clientId = "";
-
 /** URL pattern for SoundCloud - ripped from play-dl */
 const SOUNDCLOUD_URL_PATTERN =
 	/^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
 
 /**
- * Returns a free client ID - ripped from play-dl
- */
-export async function getClientId(): Promise<string> {
-	const { data } = await axios.get("https://soundcloud.com/").catch((err: Error) => {
-		throw err;
-	});
-	const urls: string[] = [];
-	data.split('<script crossorigin src="').forEach((r: string) => {
-		if (r.startsWith("https")) urls.push(r.split('"')[0]);
-	});
-	const { data: data2 } = await axios.get(urls[urls.length - 1]).catch((err: Error) => {
-		throw err;
-	});
-	return data2.split(',client_id:"')[1].split('"')[0];
-}
-
-/**
  * Returns MusicTrack or MusicPlaylist with information from SoundCloud
  */
 export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylist> {
-	clientId = await getKey("soundcloudClientId");
+	let clientId = await getKey("SOUNDCLOUD_CLIENTID");
 
 	url = url.trim();
 	if (!url.match(SOUNDCLOUD_URL_PATTERN))
@@ -54,7 +35,7 @@ export async function SoundCloudSearch(
 	limit: number,
 	type: "tracks" | "playlists" | "albums" = "tracks"
 ): Promise<BarbaraType[]> {
-	clientId = await getKey("soundcloudClientId");
+	let clientId = await getKey("SOUNDCLOUD_CLIENTID");
 	console.log(clientId);
 
 	let results: BarbaraType[] = [];

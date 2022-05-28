@@ -4,7 +4,7 @@ exports.MusicPlaylistFromSoundCloud = exports.MusicTrackFromSoundCloud = void 0;
 const classes_1 = require("../../classes");
 const config_1 = require("../../config");
 function MusicTrackFromSoundCloud(data) {
-    const clientId = (0, config_1.getKey)("soundcloudClientId");
+    const clientId = (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
     return new classes_1.MusicTrack({
         name: data.title,
         url: data.url || data.permalink_url,
@@ -33,7 +33,7 @@ function MusicTrackFromSoundCloud(data) {
 }
 exports.MusicTrackFromSoundCloud = MusicTrackFromSoundCloud;
 function MusicPlaylistFromSoundCloud(data) {
-    const clientId = (0, config_1.getKey)("soundcloudClientId");
+    const clientId = (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
     return new classes_1.MusicPlaylist({
         name: data.title,
         url: data.url || data.permalink_url,

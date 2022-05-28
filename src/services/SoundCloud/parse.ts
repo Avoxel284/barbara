@@ -2,7 +2,7 @@ import { MusicPlaylist, MusicTrack, Service } from "../../classes";
 import { getKey } from "../../config";
 
 export function MusicTrackFromSoundCloud(data: any) {
-	const clientId = getKey("soundcloudClientId");
+	const clientId = getKey("SOUNDCLOUD_CLIENTID");
 
 	return new MusicTrack({
 		name: data.title,
@@ -32,7 +32,7 @@ export function MusicTrackFromSoundCloud(data: any) {
 }
 
 export function MusicPlaylistFromSoundCloud(data: any) {
-	const clientId = getKey("soundcloudClientId");
+	const clientId = getKey("SOUNDCLOUD_CLIENTID");
 
 	return new MusicPlaylist({
 		name: data.title,

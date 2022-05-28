@@ -2,9 +2,7 @@ import { Readable } from "stream";
 import { getTimeFromSeconds } from "../util";
 import prism from "prism-media";
 import axios from "axios";
-import { getKey, isDebug } from "../config";
-
-let clientId = getKey("soundcloudClientId");
+import { isDebug } from "../config";
 
 export interface SearchOptions {
 	/** Service to search track on */
@@ -134,7 +132,7 @@ export class MusicTrack {
 		this.queuedBy = data.queuedBy;
 		this.duration = data.duration || 0;
 		this.durationTimestamp = getTimeFromSeconds(data.duration || 0);
-		this.live = data.live;
+		this.live = data.live || false;
 		this.playlisted = data.playlisted || false;
 		this.service = data.service;
 		this.audio = data.audio;

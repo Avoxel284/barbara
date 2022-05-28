@@ -1,6 +1,7 @@
 import { MusicTrack, SearchOptions, Service, InfoOptions } from "./classes";
 import { SoundCloud, SoundCloudSearch } from "./services/SoundCloud";
 import { YouTubeSearch, YouTube } from "./services/YouTube";
+import { setKey, freeKeys } from "./config";
 
 /**
  * Searches given keywords on YouTube, unless other service is specified in search options.
@@ -23,4 +24,5 @@ export async function info(url: string, options: InfoOptions) {}
 
 export { MusicTrack, SearchOptions, Service };
 export { SoundCloud, SoundCloudSearch };
+export { setKey, freeKeys };
 // export { YouTube, YouTubeSearch };
