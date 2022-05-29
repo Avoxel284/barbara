@@ -88,7 +88,7 @@ export function MusicTrackFromYouTube(data: any) {
 		name: videoData.title,
 		// description: videoData.shortDescription,
 		duration: Number(videoData.lengthSeconds),
-		durationTime: getTimeFromSeconds(videoData.lengthSeconds),
+		durationTimestamp: getTimeFromSeconds(videoData.lengthSeconds),
 		thumbnail: videoData.thumbnail.thumbnails[0].url,
 		author: {
 			name: videoData.author,

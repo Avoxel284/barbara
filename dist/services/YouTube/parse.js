@@ -48,7 +48,7 @@ function MusicTrackFromYouTube(data) {
         id: videoData.videoId,
         name: videoData.title,
         duration: Number(videoData.lengthSeconds),
-        durationTime: (0, util_1.getTimeFromSeconds)(videoData.lengthSeconds),
+        durationTimestamp: (0, util_1.getTimeFromSeconds)(videoData.lengthSeconds),
         thumbnail: videoData.thumbnail.thumbnails[0].url,
         author: {
             name: videoData.author,

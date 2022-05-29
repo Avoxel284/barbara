@@ -3,6 +3,8 @@ import { getKey } from "../../config";
 
 export function MusicTrackFromSoundCloud(data: any) {
 	const clientId = getKey("SOUNDCLOUD_CLIENTID");
+	if (data.artwork_url.match(/-large\.jpg/g))
+		data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg");
 
 	return new MusicTrack({
 		name: data.title,
@@ -33,6 +35,8 @@ export function MusicTrackFromSoundCloud(data: any) {
 
 export function MusicPlaylistFromSoundCloud(data: any) {
 	const clientId = getKey("SOUNDCLOUD_CLIENTID");
+	if (data.artwork_url.match(/-large\.jpg/g))
+		data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg");
 
 	return new MusicPlaylist({
 		name: data.title,
