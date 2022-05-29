@@ -1,1 +1,1 @@
-{"version":3,"file":"parse.d.ts","sourceRoot":"","sources":["../../../src/services/SoundCloud/parse.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,UAAU,EAAW,MAAM,eAAe,CAAC;AAGnE,wBAAgB,wBAAwB,CAAC,IAAI,EAAE,GAAG,cA4BjD;AAED,wBAAgB,2BAA2B,CAAC,IAAI,EAAE,GAAG,iBA4BpD"}
+{"version":3,"file":"parse.d.ts","sourceRoot":"","sources":["../../../src/services/SoundCloud/parse.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,UAAU,EAAW,MAAM,eAAe,CAAC;AAGnE,wBAAgB,wBAAwB,CAAC,IAAI,EAAE,GAAG,cA8BjD;AAED,wBAAgB,2BAA2B,CAAC,IAAI,EAAE,GAAG,iBA4BpD"}

@@ -16,7 +16,9 @@ export function MusicTrackFromSoundCloud(data: any) {
 			id: data?.user?.id,
 			verified: data?.user?.verified,
 		},
-		thumbnail: data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg"),
+		thumbnail: data.artwork_url
+			? data.artwork_url?.replace(/-large\.jpg/g, "-t300x300.jpg")
+			: undefined,
 		service: Service.soundcloud,
 		audio: data.media.transcodings.map((a: any) => {
 			return {
