@@ -3,8 +3,6 @@ import { getKey } from "../../config";
 
 export function MusicTrackFromSoundCloud(data: any) {
 	const clientId = getKey("SOUNDCLOUD_CLIENTID");
-	if (data.artwork_url.match(/-large\.jpg/g))
-		data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg");
 
 	return new MusicTrack({
 		name: data.title,
@@ -18,7 +16,7 @@ export function MusicTrackFromSoundCloud(data: any) {
 			id: data?.user?.id,
 			verified: data?.user?.verified,
 		},
-		thumbnail: data.artwork_url,
+		thumbnail: data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg"),
 		service: Service.soundcloud,
 		audio: data.media.transcodings.map((a: any) => {
 			return {
@@ -35,8 +33,6 @@ export function MusicTrackFromSoundCloud(data: any) {
 
 export function MusicPlaylistFromSoundCloud(data: any) {
 	const clientId = getKey("SOUNDCLOUD_CLIENTID");
-	if (data.artwork_url.match(/-large\.jpg/g))
-		data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg");
 
 	return new MusicPlaylist({
 		name: data.title,
@@ -49,7 +45,7 @@ export function MusicPlaylistFromSoundCloud(data: any) {
 			avatar: data?.user?.avatar_url,
 			id: data?.user?.id,
 		},
-		thumbnail: data.artwork_url,
+		thumbnail: data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg"),
 		service: Service.soundcloud,
 		isAlbum: data.set_type == "album",
 		tracks: data.tracks

@@ -5,8 +5,6 @@ const classes_1 = require("../../classes");
 const config_1 = require("../../config");
 function MusicTrackFromSoundCloud(data) {
     const clientId = (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
-    if (data.artwork_url.match(/-large\.jpg/g))
-        data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg");
     return new classes_1.MusicTrack({
         name: data.title,
         url: data.url || data.permalink_url,
@@ -19,7 +17,7 @@ function MusicTrackFromSoundCloud(data) {
             id: data?.user?.id,
             verified: data?.user?.verified,
         },
-        thumbnail: data.artwork_url,
+        thumbnail: data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg"),
         service: classes_1.Service.soundcloud,
         audio: data.media.transcodings.map((a) => {
             return {
@@ -36,8 +34,6 @@ function MusicTrackFromSoundCloud(data) {
 exports.MusicTrackFromSoundCloud = MusicTrackFromSoundCloud;
 function MusicPlaylistFromSoundCloud(data) {
     const clientId = (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
-    if (data.artwork_url.match(/-large\.jpg/g))
-        data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg");
     return new classes_1.MusicPlaylist({
         name: data.title,
         url: data.url || data.permalink_url,
@@ -49,7 +45,7 @@ function MusicPlaylistFromSoundCloud(data) {
             avatar: data?.user?.avatar_url,
             id: data?.user?.id,
         },
-        thumbnail: data.artwork_url,
+        thumbnail: data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg"),
         service: classes_1.Service.soundcloud,
         isAlbum: data.set_type == "album",
         tracks: data.tracks
