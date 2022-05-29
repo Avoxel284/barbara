@@ -45,7 +45,9 @@ function MusicPlaylistFromSoundCloud(data) {
             avatar: data?.user?.avatar_url,
             id: data?.user?.id,
         },
-        thumbnail: data.artwork_url.replace(/-large\.jpg/g, "-t300x300.jpg"),
+        thumbnail: data.artwork_url
+            ? data.artwork_url?.replace(/-large\.jpg/g, "-t300x300.jpg")
+            : undefined,
         service: classes_1.Service.soundcloud,
         isAlbum: data.set_type == "album",
         tracks: data.tracks
