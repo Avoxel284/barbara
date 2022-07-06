@@ -1,7 +1,12 @@
 /**
- * Returns a random integer
- * @param min Random integer minimum
- * @param max Random integer maximum
+ * Avoxel284 2022
+ * Barbara Music Module
+ */
+
+/**
+ * Returns a random integer between two given integers
+ * @param min Minimum
+ * @param max Maximum
  */
 export function getRandomInt(min: number, max: number): number {
 	min = Math.ceil(min);
@@ -17,10 +22,7 @@ export function getTimeFromSeconds(time: number) {
 	let mins = ~~((time % 3600) / 60);
 	let secs = ~~time % 60;
 	let ret = "";
-
-	if (hrs > 0) {
-		ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-	}
+	if (hrs > 0) ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
 
 	ret += "" + mins + ":" + (secs < 10 ? "0" : "");
 	ret += "" + secs;

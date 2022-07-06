@@ -1,3 +1,8 @@
+/**
+ * Avoxel284 2022
+ * Barbara Music Module
+ */
+
 import axios from "axios";
 
 const keys = {

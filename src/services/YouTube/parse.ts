@@ -1,6 +1,11 @@
-import { MusicPlaylist, MusicTrack, Service } from "../../classes";
-import { getSecondsFromTime, getTimeFromSeconds } from "../../util";
-import { Audio } from "../../classes";
+/**
+ * Avoxel284 2022
+ * Barbara Music Module / YouTube
+ */
+
+import { MusicPlaylist, MusicTrack, Service } from "../../lib";
+import { getSecondsFromTime, getTimeFromSeconds } from "../../lib/util";
+import { Audio } from "../../lib";
 
 /**
  * Parse a MusicTrack from YouTube video page data.

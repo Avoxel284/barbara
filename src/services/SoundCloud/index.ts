@@ -1,7 +1,12 @@
-import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../classes";
+/**
+ * Avoxel284 2022
+ * Barbara Music Module / SoundCloud
+ */
+
+import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../lib";
 import axios from "axios";
 import { MusicTrackFromSoundCloud, MusicPlaylistFromSoundCloud } from "./parse";
-import { getKey } from "../../config";
+import { getKey } from "../../lib/config";
 
 /** URL pattern for SoundCloud - ripped from play-dl */
 const SOUNDCLOUD_URL_PATTERN =

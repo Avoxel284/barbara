@@ -1,8 +1,13 @@
+/**
+ * Avoxel284 2022
+ * Barbara Music Module
+ */
+
 import { Readable } from "stream";
-import { getTimeFromSeconds } from "../util";
+import { getTimeFromSeconds } from "./util";
 import prism from "prism-media";
 import axios from "axios";
-import { isDebug } from "../config";
+import { isDebug } from "./config";
 
 export interface SearchOptions {
 	/** Service to search track on */

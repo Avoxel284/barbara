@@ -1,11 +1,16 @@
-import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../classes";
+/**
+ * Avoxel284 2022
+ * Barbara Music Module / YouTube
+ */
+
+import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../lib";
 import axios from "axios";
 import {
 	MusicPlaylistFromYouTube,
 	MusicTrackFromYouTube,
 	MusicTrackFromYouTubeSearch,
 } from "./parse";
-import { isDebug } from "../../config";
+import { isDebug } from "../../lib/config";
 
 /**
  * Returns {@link MusicTrack} or {@link MusicPlaylist} from a given YouTube URL
@@ -16,15 +21,13 @@ export async function YouTube(url: string): Promise<MusicTrack | MusicPlaylist> 
 	// if (!url.match(YOUTUBE_URL_PATTERN)) throw new Error(`Given URL is not a valid YouTube URL`);
 
 	let videoId;
-	if (url.includes("youtu.be/")) {
-		videoId = url.split("youtu.be/")[1].split(/(\?|\/|&)/)[0];
-	} else if (url.includes("youtube.com/embed/")) {
+	if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1].split(/(\?|\/|&)/)[0];
+	else if (url.includes("youtube.com/embed/"))
 		videoId = url.split("youtube.com/embed/")[1].split(/(\?|\/|&)/)[0];
-	} else if (url.includes("youtube.com/shorts/")) {
+	else if (url.includes("youtube.com/shorts/"))
 		videoId = url.split("youtube.com/shorts/")[1].split(/(\?|\/|&)/)[0];
-	} else {
-		videoId = (url.split("watch?v=")[1] ?? url.split("&v=")[1]).split(/(\?|\/|&)/)[0];
-	}
+	else videoId = (url.split("watch?v=")[1] ?? url.split("&v=")[1]).split(/(\?|\/|&)/)[0];
+
 	if (!videoId) throw new Error("Given URL is not a valid YouTube URL");
 
 	const { data: html } = await axios

@@ -1,5 +1,10 @@
-import { MusicPlaylist, MusicTrack, Service } from "../../classes";
-import { getKey } from "../../config";
+/**
+ * Avoxel284 2022
+ * Barbara Music Module / SoundCloud
+ */
+
+import { MusicPlaylist, MusicTrack, Service } from "../../lib";
+import { getKey } from "../../lib/config";
 
 export function MusicTrackFromSoundCloud(data: any) {
 	const clientId = getKey("SOUNDCLOUD_CLIENTID");

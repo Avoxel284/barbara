@@ -1,7 +1,12 @@
-import { MusicTrack, SearchOptions, Service, InfoOptions } from "./classes";
+/**
+ * Avoxel284 2022
+ * Barbara Music Module
+ */
+
+import { MusicTrack, SearchOptions, Service, InfoOptions } from "./lib";
 import { SoundCloud, SoundCloudSearch } from "./services/SoundCloud";
 import { YouTubeSearch, YouTube } from "./services/YouTube";
-import { setKey, freeKeys } from "./config";
+import { setKey, freeKeys } from "./lib/config";
 
 /**
  * Searches given keywords on YouTube, unless other service is specified in search options.
