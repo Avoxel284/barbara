@@ -44,6 +44,7 @@ async function search(query, options) {
             return await (0, YouTube_1.YouTubeSearch)(query, options.limit, type);
             break;
     }
+    throw new Error("Invalid service");
 }
 exports.search = search;
 async function serviceFromURL(url) {

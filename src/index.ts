@@ -22,13 +22,16 @@ import { AudioFile, AUDIOFILE_URL_PATTERN } from "./services/Arbitrary";
 import { debugLog } from "./lib/util";
 
 /**
- * Searches given keywords on SoundCloud, unless other service is specified in search options.
+ * Searches for tracks with given query on SoundCloud, unless other service and type is specified in search options.
  *
  * @param query Search query
  * @param options Search options
- * @returns Array of MusicTrack objects
+ * @returns Array of MusicTrack or MusicPlaylist objects
  */
-export async function search(query: string, options: SearchOptions) {
+export async function search(
+	query: string,
+	options: SearchOptions
+): Promise<MusicTrack[] | MusicPlaylist[]> {
 	let type: any;
 
 	options ??= {
@@ -55,6 +58,8 @@ export async function search(query: string, options: SearchOptions) {
 			return await YouTubeSearch(query, options.limit, type);
 			break;
 	}
+
+	throw new Error("Invalid service");
 }
 
 /**

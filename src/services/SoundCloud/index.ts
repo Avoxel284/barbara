@@ -45,7 +45,7 @@ export async function SoundCloudSearch(
 	query: string,
 	limit: number = 20,
 	type: "tracks" | "playlists" | "albums" = "tracks"
-): Promise<BarbaraType[]> {
+): Promise<MusicTrack[] | MusicPlaylist[]> {
 	let clientId = await getKey("SOUNDCLOUD_CLIENTID");
 	if (!clientId) throw new Error("SoundCloud Client ID is not set!");
 	if (!query) throw new Error("No query given!");

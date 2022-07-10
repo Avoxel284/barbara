@@ -57,8 +57,8 @@ export async function YouTubeSearch(
 	query: string,
 	limit: number = 10,
 	type: "video" | "playlist" = "video"
-): Promise<BarbaraType[]> {
-	let results: BarbaraType[] = [];
+): Promise<MusicTrack[] | MusicPlaylist[]> {
+	let results: any = [];
 	let url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 
 	if (url.indexOf("&sp=") === -1) {

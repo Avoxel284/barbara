@@ -46,4 +46,4 @@ barbara.search("never gonna give you up", { service: "youtube" }).then(async (tr
 
 ## Documentation
 
-Barbara Music was made with being straight-forward and easy to use in mind. Thus, a cheatsheet can be found [here](https://github.com/Avoxel284/barbara/cheatsheet.md), and reference documentation can be found [here](https://avoxel284.github.io/barbara).
+Barbara Music was made with being straight-forward and easy to use in mind. Thus, a cheatsheet can be found [here](https://github.com/Avoxel284/barbara/CHEATSHEET.md), and reference documentation can be found [here](https://avoxel284.github.io/barbara).
