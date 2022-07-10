@@ -6,22 +6,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.YouTubeSearch = exports.YouTube = void 0;
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
-const config_1 = require("../../config");
+const util_1 = require("../../lib/util");
 async function YouTube(url) {
     url = url.trim();
     let videoId;
-    if (url.includes("youtu.be/")) {
+    if (url.includes("youtu.be/"))
         videoId = url.split("youtu.be/")[1].split(/(\?|\/|&)/)[0];
-    }
-    else if (url.includes("youtube.com/embed/")) {
+    else if (url.includes("youtube.com/embed/"))
         videoId = url.split("youtube.com/embed/")[1].split(/(\?|\/|&)/)[0];
-    }
-    else if (url.includes("youtube.com/shorts/")) {
+    else if (url.includes("youtube.com/shorts/"))
         videoId = url.split("youtube.com/shorts/")[1].split(/(\?|\/|&)/)[0];
-    }
-    else {
+    else
         videoId = (url.split("watch?v=")[1] ?? url.split("&v=")[1]).split(/(\?|\/|&)/)[0];
-    }
     if (!videoId)
         throw new Error("Given URL is not a valid YouTube URL");
     const { data: html } = await axios_1.default
@@ -40,7 +36,7 @@ async function YouTube(url) {
     return (0, parse_1.MusicTrackFromYouTube)(html);
 }
 exports.YouTube = YouTube;
-async function YouTubeSearch(query, limit, type = "video") {
+async function YouTubeSearch(query, limit = 10, type = "video") {
     let results = [];
     let url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
     if (url.indexOf("&sp=") === -1) {
@@ -54,7 +50,7 @@ async function YouTubeSearch(query, limit, type = "video") {
             }
         }
     }
-    console.log(url);
+    (0, util_1.debugLog)(url);
     const { data: html } = await axios_1.default
         .get(url, {
         headers: { "accept-language": "en-US;q=0.9" },
@@ -74,8 +70,7 @@ async function YouTubeSearch(query, limit, type = "video") {
             break;
         if (!item || (!item.videoRenderer && !item.channelRenderer && !item.playlistRenderer))
             continue;
-        if ((0, config_1.isDebug)())
-            console.log(type);
+        (0, util_1.debugLog)(type);
         switch (type) {
             case "video": {
                 const result = (0, parse_1.MusicTrackFromYouTubeSearch)(item);
@@ -85,8 +80,6 @@ async function YouTubeSearch(query, limit, type = "video") {
             }
             case "playlist": {
                 const result = (0, parse_1.MusicPlaylistFromYouTube)(item);
-                if (result)
-                    results.push(result);
                 break;
             }
             default:
@@ -94,8 +87,7 @@ async function YouTubeSearch(query, limit, type = "video") {
                 break;
         }
     }
-    if ((0, config_1.isDebug)())
-        console.log(results);
+    (0, util_1.debugLog)(results);
     return results;
 }
 exports.YouTubeSearch = YouTubeSearch;

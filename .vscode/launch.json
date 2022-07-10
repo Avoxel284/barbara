@@ -9,6 +9,13 @@
 			"type": "node"
 		},
 		{
+			"name": "Test Discord Voice example",
+			"program": "${workspaceFolder}/examples/discordvoice.js",
+			"request": "launch",
+			"skipFiles": ["<node_internals>/**"],
+			"type": "node"
+		},
+		{
 			"type": "node",
 			"request": "launch",
 			"name": "Launch Program",

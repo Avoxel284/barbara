@@ -1,0 +1,9 @@
+{
+	"SPOTIFY": {
+		"APIKEY": "1234567890",
+		"CLIENTID": "1234567890"
+	},
+	"CONFIG": {
+		"DEBUG": false
+	}
+}

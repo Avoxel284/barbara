@@ -21,6 +21,9 @@ export function MusicTrackFromSoundCloud(data: any) {
 			id: data?.user?.id,
 			verified: data?.user?.verified,
 		},
+		explicit: false,
+		queuedBy: null,
+		playlisted: false,
 		thumbnail: data.artwork_url
 			? data.artwork_url?.replace(/-large\.jpg/g, "-t300x300.jpg")
 			: undefined,
@@ -56,7 +59,7 @@ export function MusicPlaylistFromSoundCloud(data: any) {
 			? data.artwork_url?.replace(/-large\.jpg/g, "-t300x300.jpg")
 			: undefined,
 		service: Service.soundcloud,
-		isAlbum: data.set_type == "album",
+		isAlbum: data.set_type === "album",
 		tracks: data.tracks
 			.filter((t: any) => t?.title?.length > 0)
 			.map((m: any) => {

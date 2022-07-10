@@ -9,11 +9,11 @@ import { MusicTrackFromSoundCloud, MusicPlaylistFromSoundCloud } from "./parse";
 import { getKey } from "../../lib/config";
 
 /** URL pattern for SoundCloud - ripped from play-dl */
-const SOUNDCLOUD_URL_PATTERN =
+export const SOUNDCLOUD_URL_PATTERN =
 	/^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
 
 /**
- * Returns MusicTrack or MusicPlaylist with information from SoundCloud
+ * Returns {@link MusicTrack} or {@link MusicPlaylist} with data from SoundCloud from a given resource URL
  */
 export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylist> {
 	let clientId = await getKey("SOUNDCLOUD_CLIENTID");
@@ -27,55 +27,46 @@ export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylis
 			throw err;
 		});
 
-	if (data.kind === "track") return MusicTrackFromSoundCloud(data);
-	else if (data.kind === "playlist") return MusicPlaylistFromSoundCloud(data);
-	else throw new Error("SoundCloud returned unknown resource");
+	if (data.kind === "track") {
+		return MusicTrackFromSoundCloud(data);
+	}
+
+	if (data.kind === "playlist") {
+		return MusicPlaylistFromSoundCloud(data);
+	}
+
+	throw new Error("SoundCloud returned unknown resource.");
 }
 
 /**
- * Searches for a SoundCloud track or playlist
+ * Searches for a SoundCloud track or playlist and returns with an array of {@link MusicTrack} or {@link MusicPlaylist}
  */
 export async function SoundCloudSearch(
 	query: string,
-	limit: number = 5,
+	limit: number = 20,
 	type: "tracks" | "playlists" | "albums" = "tracks"
 ): Promise<BarbaraType[]> {
 	let clientId = await getKey("SOUNDCLOUD_CLIENTID");
-	console.log(clientId);
+	if (!clientId) throw new Error("SoundCloud Client ID is not set!");
+	if (!query) throw new Error("No query given!");
 
-	let results: BarbaraType[] = [];
 	const { data } = await axios
 		.get(
-			`https://api-v2.soundcloud.com/search/${type}?q=${query}&client_id=${clientId}&limit=${limit}`
+			`https://api-v2.soundcloud.com/search/${type}?q=${encodeURIComponent(
+				query
+			)}&client_id=${clientId}&limit=${limit}`
 		)
 		.catch((err: Error) => {
 			throw err;
 		});
 
-	if (type === "tracks")
-		data.collection.forEach((d: any) => results.push(MusicTrackFromSoundCloud(d)));
-	else if (type === "albums" || type === "playlists")
-		data.collection.forEach((d: any) => results.push(MusicPlaylistFromSoundCloud(d)));
-	else {
-		throw new Error("Unknown SoundCloud resource type");
+	if (type === "tracks") {
+		return data.collection.map((d: any) => MusicTrackFromSoundCloud(d));
 	}
 
-	return results;
+	if (type === "albums" || type === "playlists") {
+		return data.collection.map((d: any) => MusicPlaylistFromSoundCloud(d));
+	}
+
+	throw new Error("SoundCloud returned unknown resource.");
 }
-
-// export async function SoundCloudStream(mt: MusicTrack) {
-// 	if (mt.service !== Service.soundcloud)
-// 		throw Error("MusicTrack service is not SoundCloud, thus cannot be streamed");
-
-// 	const HLSformats = parseHlsFormats(data.formats);
-// 	if (typeof quality !== "number") quality = HLSformats.length - 1;
-// 	else if (quality <= 0) quality = 0;
-// 	else if (quality >= HLSformats.length) quality = HLSformats.length - 1;
-// 	const req_url = HLSformats[quality].url + "?client_id=" + soundData.client_id;
-// 	console.log(req_url);
-// 	const s_data = JSON.parse(await request(req_url));
-// 	const type = HLSformats[quality].format.mime_type.startsWith("audio/ogg")
-// 		? StreamType.OggOpus
-// 		: StreamType.Arbitrary;
-// 	return new SoundCloudStream(s_data.url, type);
-// }

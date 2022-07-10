@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MusicPlaylistFromYouTube = exports.MusicTrackFromYouTubeSearch = exports.MusicTrackFromYouTube = void 0;
-const classes_1 = require("../../classes");
-const util_1 = require("../../util");
+const lib_1 = require("../../lib");
+const util_1 = require("../../lib/util");
 function MusicTrackFromYouTube(data) {
     let playerData = data
         .split("var ytInitialPlayerResponse = ")?.[1]
@@ -43,12 +43,11 @@ function MusicTrackFromYouTube(data) {
         });
     console.log(playerData.streamingData.formats);
     console.log(playerData.streamingData.adaptiveFormats);
-    return new classes_1.MusicTrack({
+    return new lib_1.MusicTrack({
         url: `https://www.youtube.com/watch?v=${videoData.videoId}`,
         id: videoData.videoId,
         name: videoData.title,
         duration: Number(videoData.lengthSeconds),
-        durationTimestamp: (0, util_1.getTimeFromSeconds)(videoData.lengthSeconds),
         thumbnail: videoData.thumbnail.thumbnails[0].url,
         author: {
             name: videoData.author,
@@ -59,7 +58,7 @@ function MusicTrackFromYouTube(data) {
         },
         audio: audios,
         live: videoData.isLiveContent,
-        service: classes_1.Service.youtube,
+        service: lib_1.Service.youtube,
         originalData: videoData,
     });
 }
@@ -72,12 +71,11 @@ function MusicTrackFromYouTubeSearch(data) {
     const thumbnail = data.videoRenderer.thumbnail.thumbnails[data.videoRenderer.thumbnail.thumbnails.length - 1];
     const avatar = data.videoRenderer.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail
         .thumbnails[0];
-    return new classes_1.MusicTrack({
+    return new lib_1.MusicTrack({
         url: `https://www.youtube.com/watch?v=${data.videoRenderer.videoId}`,
         name: data.videoRenderer.title.runs[0].text,
         id: data.videoRenderer.videoId,
         duration: duration ? (0, util_1.getSecondsFromTime)(duration.simpleText) : 0,
-        durationTimestamp: duration ? duration.simpleText : null,
         thumbnail: thumbnail?.url,
         author: {
             id: channel.navigationEndpoint.browseEndpoint.browseId || null,
@@ -87,16 +85,12 @@ function MusicTrackFromYouTubeSearch(data) {
             avatar: avatar,
         },
         live: duration ? false : true,
-        service: classes_1.Service.youtube,
+        service: lib_1.Service.youtube,
         originalData: data.videoRenderer,
     });
 }
 exports.MusicTrackFromYouTubeSearch = MusicTrackFromYouTubeSearch;
 function MusicPlaylistFromYouTube(data) {
-    return new classes_1.MusicPlaylist({
-        url: "",
-        service: classes_1.Service.youtube,
-    });
 }
 exports.MusicPlaylistFromYouTube = MusicPlaylistFromYouTube;
 //# sourceMappingURL=parse.js.map

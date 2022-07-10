@@ -61,7 +61,7 @@ export function MusicTrackFromYouTube(data: any) {
 		initialData.contents.twoColumnWatchNextResults.results.results.contents?.[1]
 			?.videoSecondaryInfoRenderer?.metadataRowContainer?.metadataRowContainerRenderer?.rows;
 
-	// TODO: Music metadata
+	// TODO: yt music metadata
 	if (musicData)
 		musicData.forEach((m: any) => {
 			// console.log(m);
@@ -93,7 +93,6 @@ export function MusicTrackFromYouTube(data: any) {
 		name: videoData.title,
 		// description: videoData.shortDescription,
 		duration: Number(videoData.lengthSeconds),
-		durationTimestamp: getTimeFromSeconds(videoData.lengthSeconds),
 		thumbnail: videoData.thumbnail.thumbnails[0].url,
 		author: {
 			name: videoData.author,
@@ -135,7 +134,6 @@ export function MusicTrackFromYouTubeSearch(data: any) {
 		// 			.join("")
 		// 	: "",
 		duration: duration ? getSecondsFromTime(duration.simpleText) : 0,
-		durationTimestamp: duration ? duration.simpleText : null,
 		thumbnail: thumbnail?.url,
 		author: {
 			id: channel.navigationEndpoint.browseEndpoint.browseId || null,
@@ -157,9 +155,8 @@ export function MusicTrackFromYouTubeSearch(data: any) {
  * Some code was ripped from play-dl
  */
 export function MusicPlaylistFromYouTube(data: any) {
-	return new MusicPlaylist({
-		url: "",
-
-		service: Service.youtube,
-	});
+	// return new MusicPlaylist({
+	// 	url: "",
+	// 	service: Service.youtube,
+	// });
 }

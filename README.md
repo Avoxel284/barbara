@@ -1,6 +1,6 @@
 <img src="./media/Banner.png">
 
-<b>[Documentation](https://avoxel284.github.io/barbara) | [Examples](https://github.com/Avoxel284/barbara/examples)</b>
+<b>[Documentation](https://avoxel284.github.io/barbara) | [Examples](https://github.com/Avoxel284/barbara/examples) | [Cheatsheet](https://github.com/Avoxel284/barbara/cheatsheet.md)</b>
 
 ## **WORK IN PROGRESS!**
 
@@ -24,7 +24,7 @@ npm install barbara-music
 ## Examples
 
 Note: Barbara must be authenticated before use!
-Authentication can be done very easily:
+Authentication can be performed like below:
 
 ```js
 const barbara = require("barbara-music");
@@ -33,24 +33,17 @@ const barbara = require("barbara-music");
 barbara.setKey("SOUNDCLOUD_CLIENTID", await barbara.freeKey("SOUNDCLOUD_CLIENTID"));
 ```
 
-Further documentation will be added later
+Refer to the cheatsheet for auth key identifiers.
 
 ```js
 const barbara = require("barbara-music");
 
-barbara.searchTrack("never gonna give you up", barbara.yt).then(async (track) => {
-	const resource = discordVoice.createAudioResource(await track.sing());
+barbara.search("never gonna give you up", { service: "youtube" }).then(async (tracks) => {
+	const track = tracks[0];
+	const resource = discordVoice.createAudioResource(await track.resource());
 });
 ```
 
-## Cheatsheet
+## Documentation
 
-### Key identifiers
-
-- **SOUNDCLOUD_CLIENTID**
-SoundCloud Client ID for use in API. Obtainable via SoundCloud Developer program or web scraping.
-
-- **SPOTIFY_APIKEY**
-Spotify API key. Obtainable via signing up on Spotify Developer dashboard.
-
-- **SPOTIFY**
+Barbara Music was made with being straight-forward and easy to use in mind. Thus, a cheatsheet can be found [here](https://github.com/Avoxel284/barbara/cheatsheet.md), and reference documentation can be found [here](https://avoxel284.github.io/barbara).

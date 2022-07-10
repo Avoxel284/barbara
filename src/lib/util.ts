@@ -3,6 +3,8 @@
  * Barbara Music Module
  */
 
+import { getKey } from "./config";
+
 /**
  * Returns a random integer between two given integers
  * @param min Minimum
@@ -12,6 +14,15 @@ export function getRandomInt(min: number, max: number): number {
 	min = Math.ceil(min);
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Debug logging function for internal use
+ */
+export function debugLog(message: any) {
+	if (!getKey("CONFIG_DEBUG")) return;
+	console.log(`\u001b[36;1m[ Barbara Debug ]\u001b[0m`, message);
+	// \u001b[36;1m
 }
 
 /**

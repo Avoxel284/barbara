@@ -3,46 +3,48 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SoundCloudSearch = exports.SoundCloud = void 0;
+exports.SoundCloudSearch = exports.SoundCloud = exports.SOUNDCLOUD_URL_PATTERN = void 0;
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
-const config_1 = require("../../config");
-const SOUNDCLOUD_URL_PATTERN = /^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
+const config_1 = require("../../lib/config");
+exports.SOUNDCLOUD_URL_PATTERN = /^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
 async function SoundCloud(url) {
     let clientId = await (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
     url = url.trim();
-    if (!url.match(SOUNDCLOUD_URL_PATTERN))
+    if (!url.match(exports.SOUNDCLOUD_URL_PATTERN))
         throw new Error(`Given URL is not a valid SoundCloud URL`);
     const { data } = await axios_1.default
         .get(`https://api-v2.soundcloud.com/resolve?url=${url}&client_id=${clientId}`)
         .catch((err) => {
         throw err;
     });
-    if (data.kind === "track")
+    if (data.kind === "track") {
         return (0, parse_1.MusicTrackFromSoundCloud)(data);
-    else if (data.kind === "playlist")
+    }
+    if (data.kind === "playlist") {
         return (0, parse_1.MusicPlaylistFromSoundCloud)(data);
-    else
-        throw new Error("SoundCloud returned unknown resource");
+    }
+    throw new Error("SoundCloud returned unknown resource.");
 }
 exports.SoundCloud = SoundCloud;
-async function SoundCloudSearch(query, limit = 5, type = "tracks") {
+async function SoundCloudSearch(query, limit = 20, type = "tracks") {
     let clientId = await (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
-    console.log(clientId);
-    let results = [];
+    if (!clientId)
+        throw new Error("SoundCloud Client ID is not set!");
+    if (!query)
+        throw new Error("No query given!");
     const { data } = await axios_1.default
-        .get(`https://api-v2.soundcloud.com/search/${type}?q=${query}&client_id=${clientId}&limit=${limit}`)
+        .get(`https://api-v2.soundcloud.com/search/${type}?q=${encodeURIComponent(query)}&client_id=${clientId}&limit=${limit}`)
         .catch((err) => {
         throw err;
     });
-    if (type === "tracks")
-        data.collection.forEach((d) => results.push((0, parse_1.MusicTrackFromSoundCloud)(d)));
-    else if (type === "albums" || type === "playlists")
-        data.collection.forEach((d) => results.push((0, parse_1.MusicPlaylistFromSoundCloud)(d)));
-    else {
-        throw new Error("Unknown SoundCloud resource type");
+    if (type === "tracks") {
+        return data.collection.map((d) => (0, parse_1.MusicTrackFromSoundCloud)(d));
     }
-    return results;
+    if (type === "albums" || type === "playlists") {
+        return data.collection.map((d) => (0, parse_1.MusicPlaylistFromSoundCloud)(d));
+    }
+    throw new Error("SoundCloud returned unknown resource.");
 }
 exports.SoundCloudSearch = SoundCloudSearch;
 //# sourceMappingURL=index.js.map

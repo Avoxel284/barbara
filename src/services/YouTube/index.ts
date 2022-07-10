@@ -10,7 +10,7 @@ import {
 	MusicTrackFromYouTube,
 	MusicTrackFromYouTubeSearch,
 } from "./parse";
-import { isDebug } from "../../lib/config";
+import { debugLog } from "../../lib/util";
 
 /**
  * Returns {@link MusicTrack} or {@link MusicPlaylist} from a given YouTube URL
@@ -46,98 +46,7 @@ export async function YouTube(url: string): Promise<MusicTrack | MusicPlaylist> 
 	if (html.includes("Our systems have detected unusual traffic from your computer network."))
 		throw new Error("YouTube detected we're a bot.. thanks youtube.");
 
-	// 	const rawChapters =
-	// 	initial_response.playerOverlays.playerOverlayRenderer.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer.playerBar?.multiMarkersPlayerBarRenderer.markersMap.find(
-	// 		(m: any) => m.key === "DESCRIPTION_CHAPTERS"
-	// 	)?.value?.chapters;
-	// const chapters: VideoChapter[] = [];
-	// if (rawChapters) {
-	// 	for (const { chapterRenderer } of rawChapters) {
-	// 		chapters.push({
-	// 			title: chapterRenderer.title.simpleText,
-	// 			timestamp: parseSeconds(chapterRenderer.timeRangeStartMillis / 1000),
-	// 			seconds: chapterRenderer.timeRangeStartMillis / 1000,
-	// 			thumbnails: chapterRenderer.thumbnail.thumbnails,
-	// 		});
-	// 	}
-	// }
-
 	return MusicTrackFromYouTube(html);
-
-	// -------------
-
-	// let upcomingDate;
-	// if (upcoming) {
-	// 	if (microformat.liveBroadcastDetails.startTimestamp)
-	// 		upcomingDate = new Date(microformat.liveBroadcastDetails.startTimestamp);
-	// 	else {
-	// 		const timestamp =
-	// 			player_response.playabilityStatus.liveStreamability.liveStreamabilityRenderer.offlineSlate
-	// 				.liveStreamOfflineSlateRenderer.scheduledStartTime;
-	// 		upcomingDate = new Date(parseInt(timestamp) * 1000);
-	// 	}
-	// }
-	// const video_details = new YouTubeVideo({
-	// 	id: vid.videoId,
-	// 	title: vid.title,
-	// 	description: vid.shortDescription,
-	// 	duration: Number(vid.lengthSeconds),
-	// 	duration_raw: parseSeconds(vid.lengthSeconds),
-	// 	uploadedAt: microformat.publishDate,
-	// 	liveAt: microformat.liveBroadcastDetails?.startTimestamp,
-	// 	upcoming: upcomingDate,
-	// 	thumbnails: vid.thumbnail.thumbnails,
-	// 	channel: {
-	// 		name: vid.author,
-	// 		id: vid.channelId,
-	// 		url: `https://www.youtube.com/channel/${vid.channelId}`,
-	// 		verified: Boolean(badge?.includes("verified")),
-	// 		artist: Boolean(badge?.includes("artist")),
-	// 		icons: ownerInfo?.thumbnail?.thumbnails || undefined,
-	// 	},
-	// 	views: vid.viewCount,
-	// 	tags: vid.keywords,
-	// 	likes: parseInt(
-	// 		initial_response.contents.twoColumnWatchNextResults.results.results.contents
-	// 			.find((content: any) => content.videoPrimaryInfoRenderer)
-	// 			?.videoPrimaryInfoRenderer.videoActions.menuRenderer.topLevelButtons?.find(
-	// 				(button: any) => button.toggleButtonRenderer.defaultIcon.iconType === "LIKE"
-	// 			)
-	// 			?.toggleButtonRenderer.defaultText.accessibility?.accessibilityData.label.replace(
-	// 				/\D+/g,
-	// 				""
-	// 			) ?? 0
-	// 	),
-	// 	live: vid.isLiveContent,
-	// 	private: vid.isPrivate,
-	// 	discretionAdvised,
-	// 	music,
-	// 	chapters,
-	// });
-	// let format = [];
-	// if (!upcoming) {
-	// 	format.push(...(player_response.streamingData.formats ?? []));
-	// 	format.push(...(player_response.streamingData.adaptiveFormats ?? []));
-
-	// 	// get the formats for the android player for legacy videos
-	// 	// fixes the stream being closed because not enough data
-	// 	// arrived in time for ffmpeg to be able to extract audio data
-	// 	if (parseAudioFormats(format).length === 0 && !options.htmldata) {
-	// 		format = await getAndroidFormats(vid.videoId, cookieJar, body);
-	// 	}
-	// }
-	// const LiveStreamData = {
-	// 	isLive: video_details.live,
-	// 	dashManifestUrl: player_response.streamingData?.dashManifestUrl ?? null,
-	// 	hlsManifestUrl: player_response.streamingData?.hlsManifestUrl ?? null,
-	// };
-	// return {
-	// 	LiveStreamData,
-	// 	html5player,
-	// 	format,
-	// 	video_details,
-	// 	related_videos: related,
-	// };
 }
 
 /**
@@ -146,7 +55,7 @@ export async function YouTube(url: string): Promise<MusicTrack | MusicPlaylist> 
  */
 export async function YouTubeSearch(
 	query: string,
-	limit: number,
+	limit: number = 10,
 	type: "video" | "playlist" = "video"
 ): Promise<BarbaraType[]> {
 	let results: BarbaraType[] = [];
@@ -164,7 +73,7 @@ export async function YouTubeSearch(
 		}
 	}
 
-	console.log(url);
+	debugLog(url);
 
 	const { data: html } = await axios
 		.get(url, {
@@ -191,7 +100,7 @@ export async function YouTubeSearch(
 		if (limit && results.length >= limit) break;
 		if (!item || (!item.videoRenderer && !item.channelRenderer && !item.playlistRenderer)) continue;
 
-		if (isDebug()) console.log(type);
+		debugLog(type);
 		switch (type) {
 			case "video": {
 				const result = MusicTrackFromYouTubeSearch(item);
@@ -200,7 +109,7 @@ export async function YouTubeSearch(
 			}
 			case "playlist": {
 				const result = MusicPlaylistFromYouTube(item);
-				if (result) results.push(result);
+				// if (result) results.push(result);
 				break;
 			}
 			default:
@@ -209,6 +118,6 @@ export async function YouTubeSearch(
 		}
 	}
 
-	if (isDebug()) console.log(results);
+	debugLog(results);
 	return results;
 }
