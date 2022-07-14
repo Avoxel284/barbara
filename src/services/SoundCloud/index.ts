@@ -15,7 +15,7 @@ export const SOUNDCLOUD_URL_PATTERN =
 /**
  * Returns {@link MusicTrack} or {@link MusicPlaylist} with data from SoundCloud from a given resource URL
  */
-export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylist> {
+export async function SoundCloud_Info(url: string): Promise<MusicTrack | MusicPlaylist> {
 	let clientId = await getKey("SOUNDCLOUD_CLIENTID");
 
 	url = url.trim();
@@ -41,7 +41,7 @@ export async function SoundCloud(url: string): Promise<MusicTrack | MusicPlaylis
 /**
  * Searches for a SoundCloud track or playlist and returns with an array of {@link MusicTrack} or {@link MusicPlaylist}
  */
-export async function SoundCloudSearch(
+export async function SoundCloud_Search(
 	query: string,
 	limit: number = 20,
 	type: "tracks" | "playlists" | "albums" = "tracks"
@@ -69,4 +69,11 @@ export async function SoundCloudSearch(
 	}
 
 	throw new Error("SoundCloud returned unknown resource.");
+}
+
+/**
+ * Check a URL and validate if it is a SoundCloud URL
+ */
+export function SoundCloud_Validate(url: string) {
+	return url.match(SOUNDCLOUD_URL_PATTERN);
 }

@@ -8,10 +8,13 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 exports.getRandomInt = getRandomInt;
-function debugLog(message) {
+function debugLog(...content) {
     if (!(0, config_1.getKey)("CONFIG_DEBUG"))
         return;
-    console.log(`\u001b[36;1m[ Barbara Debug ]\u001b[0m`, message);
+    console.log(`\u001b[36;1m[ Barbara Debug ]\u001b[0m`, arguments[0]);
+    for (let i = 1; arguments.length > i; i++) {
+        console.log(arguments[i]);
+    }
 }
 exports.debugLog = debugLog;
 function getTimeFromSeconds(time) {

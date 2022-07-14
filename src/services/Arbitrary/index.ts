@@ -7,6 +7,7 @@ import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../lib";
 import axios from "axios";
 import { getKey } from "../../lib/config";
 import { debugLog } from "../../lib/util";
+import { MusicTrackFromAudioFile } from "./parse";
 import metadata from "music-metadata";
 
 const acceptedFileExtensions: string[] = ["mp3", "mp4", "ogg", "wav"];
@@ -21,7 +22,7 @@ export const AUDIOFILE_URL_PATTERN = new RegExp(
  *
  * @param reqOptions Additional options to pass to Axios when creating request (Refer to Axios documentation)
  */
-export async function AudioFile(url: string, reqOptions: any): Promise<MusicTrack | MusicPlaylist> {
+export async function AudioFile_Info(url: string, reqOptions: any): Promise<MusicTrack> {
 	url = url.trim();
 	if (!url) throw new Error("Given AudioFile URL is null!");
 	if (!url.match(AUDIOFILE_URL_PATTERN))
@@ -34,27 +35,21 @@ export async function AudioFile(url: string, reqOptions: any): Promise<MusicTrac
 			throw err;
 		});
 	debugLog(`AudioFile Content Type: ${headers["content-type"]}`);
-	const meta = await metadata.parseStream(data);
 
-	return new MusicTrack({
-		name: url.match(/[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))/)?.[0] || url,
+	return MusicTrackFromAudioFile({
 		url: url,
-		thumbnail: "",
-		// thumbnail: Buffer.from(meta?.common?.picture?.[0]?.data),
-		duration: meta.format.duration || 0,
-		live: false,
-		service: Service.audiofile,
-		audio: [
-			{
-				url: url,
-				bitrate: meta.format.bitrate,
-				mimeType: headers["content-type"],
-				protocol: "progressive??",
-				duration: meta.format.duration || 0,
-				codec: meta.format.codec,
-			},
-		],
-		author: {},
-		originalData: data,
+		...data,
+		headers: headers,
+		meta: await metadata.parseStream(data),
 	});
+
+	// call it unneccessary but at least all the data is in original data
+	// and its neater/more modular this way
+}
+
+/**
+ * Check a URL and validate if it is a Audio File URL
+ */
+export function AudioFile_Validate(url: string) {
+	return url.match(AUDIOFILE_URL_PATTERN);
 }

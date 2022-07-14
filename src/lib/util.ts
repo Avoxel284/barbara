@@ -18,11 +18,15 @@ export function getRandomInt(min: number, max: number): number {
 
 /**
  * Debug logging function for internal use
+ *
+ * @param content Parameter that can accept variable amount of content that gets logged
  */
-export function debugLog(message: any) {
+export function debugLog(...content: any) {
 	if (!getKey("CONFIG_DEBUG")) return;
-	console.log(`\u001b[36;1m[ Barbara Debug ]\u001b[0m`, message);
-	// \u001b[36;1m
+	console.log(`\u001b[36;1m[ Barbara Debug ]\u001b[0m`, arguments[0]);
+	for (let i = 1; arguments.length > i; i++) {
+		console.log(arguments[i]);
+	}
 }
 
 /**

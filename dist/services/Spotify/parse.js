@@ -28,7 +28,7 @@ function MusicPlaylistFromSpotify(data, isAlbum = false) {
         url: data.external_urls.spotify,
         id: data.id,
         duration: Number(data.duration_ms) / 1000,
-        author: {
+        authors: {
             url: data.owner.external_urls.spotify,
             name: data.owner.display_name,
             id: data.owner.id,

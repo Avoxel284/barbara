@@ -3,12 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SoundCloudSearch = exports.SoundCloud = exports.SOUNDCLOUD_URL_PATTERN = void 0;
+exports.SoundCloud_Validate = exports.SoundCloud_Search = exports.SoundCloud_Info = exports.SOUNDCLOUD_URL_PATTERN = void 0;
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
 const config_1 = require("../../lib/config");
 exports.SOUNDCLOUD_URL_PATTERN = /^(?:(https?):\/\/)?(?:(?:www|m)\.)?(api\.soundcloud\.com|soundcloud\.com|snd\.sc)\/(.*)$/;
-async function SoundCloud(url) {
+async function SoundCloud_Info(url) {
     let clientId = await (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
     url = url.trim();
     if (!url.match(exports.SOUNDCLOUD_URL_PATTERN))
@@ -26,8 +26,8 @@ async function SoundCloud(url) {
     }
     throw new Error("SoundCloud returned unknown resource.");
 }
-exports.SoundCloud = SoundCloud;
-async function SoundCloudSearch(query, limit = 20, type = "tracks") {
+exports.SoundCloud_Info = SoundCloud_Info;
+async function SoundCloud_Search(query, limit = 20, type = "tracks") {
     let clientId = await (0, config_1.getKey)("SOUNDCLOUD_CLIENTID");
     if (!clientId)
         throw new Error("SoundCloud Client ID is not set!");
@@ -46,5 +46,9 @@ async function SoundCloudSearch(query, limit = 20, type = "tracks") {
     }
     throw new Error("SoundCloud returned unknown resource.");
 }
-exports.SoundCloudSearch = SoundCloudSearch;
+exports.SoundCloud_Search = SoundCloud_Search;
+function SoundCloud_Validate(url) {
+    return url.match(exports.SOUNDCLOUD_URL_PATTERN);
+}
+exports.SoundCloud_Validate = SoundCloud_Validate;
 //# sourceMappingURL=index.js.map

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.freeKeys = exports.setKeyFile = exports.setKey = exports.getKey = void 0;
+exports.freeKey = exports.setKeyFile = exports.setKey = exports.getKey = void 0;
 const axios_1 = __importDefault(require("axios"));
 const fs_1 = __importDefault(require("fs"));
 const keys = {
@@ -23,6 +23,7 @@ const keys = {
     },
     YOUTUBE: {
         COOKIE: "",
+        INVIDIOUSSITE: "https://vid.puffyan.us",
     },
     CONFIG: {
         DEBUG: false,
@@ -71,14 +72,14 @@ function setKeyFile(path, overwrite = true) {
     keys["CONFIG"]["FILE"] = path;
 }
 exports.setKeyFile = setKeyFile;
-async function freeKeys(key) {
+async function freeKey(key) {
     const k = key.split("_");
     if (keys?.[k[0]]?.[k[1]] == null)
         throw new Error("Cannot find key: " + key);
     if (k[0] === "SOUNDCLOUD") {
         if (k[1] === "CLIENTID") {
             const { data } = await axios_1.default.get("https://soundcloud.com/").catch((err) => {
-                console.error("soundcloud free key fail");
+                console.error("An error occurred when attempting to fetch SoundCloud free key:");
                 throw err;
             });
             const urls = [];
@@ -92,7 +93,25 @@ async function freeKeys(key) {
             return data2.split(',client_id:"')[1].split('"')[0];
         }
     }
+    if (k[0] === "YOUTUBE") {
+        if (k[1] === "INVIDIOUSAPI") {
+            const { data } = await axios_1.default
+                .get(`https://api.invidious.io/instances.json?pretty=0&sort_by=type,users`)
+                .catch((err) => {
+                console.error("An error occurred when attempting to fetch Invidious api url:");
+                throw err;
+            });
+            if (!data)
+                return;
+            const urls = [];
+            data.forEach((a) => {
+                if (a[1].api)
+                    urls.push(a[1].uri);
+            });
+            return urls[0];
+        }
+    }
     throw new Error("No free authentication key can be found");
 }
-exports.freeKeys = freeKeys;
+exports.freeKey = freeKey;
 //# sourceMappingURL=config.js.map

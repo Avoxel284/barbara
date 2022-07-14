@@ -7,24 +7,25 @@ import { Readable } from "stream";
 import { debugLog, getTimeFromSeconds } from "./util";
 import prism from "prism-media";
 import axios from "axios";
+import { getKey } from "./config";
 
 export interface SearchOptions {
 	/** Service to search track on */
-	service: Service;
+	service?: Service;
 	/** Maximum results to return */
 	limit?: number;
 	/**
 	 * Type of results to return
-	 * In the case of YouTube, `tracks` are videos, `playlists` are playlists and `albums` are.. not a thing
+	 * In the case of YouTube, videos and tracks are the same thing.
 	 */
-	type: "tracks" | "playlists" | "albums";
+	type?: "tracks" | "videos" | "playlists" | "albums";
 }
 
 /** Type of media - Is it a MusicTrack or MusicPlaylist? */
 export type BarbaraType = MusicTrack | MusicPlaylist;
 
 /**
- * A service that provides the media.
+ * A service represents the platform that is providing the media (e.g. SoundCloud).
  */
 export enum Service {
 	/** Spotify */
@@ -114,14 +115,14 @@ export class MusicTrack {
 	url: string;
 	/** Name of the track */
 	name: string;
-	/** ID of the track (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ --> `dQw4w9WgXcQ`) */
-	id?: string;
 	/** An object containing additional metadata that may not always be included; e.g. the user that queued the track */
 	metadata: {
 		/** A reference to the user that queued the track - Can be set via {@link MusicTrack.setQueuedBy} or modified manually */
 		queuedBy?: any;
 		/** Is the track deemed as explicit? */
 		explicit?: boolean;
+		/** ID of the track on the platform (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ --> `dQw4w9WgXcQ`) */
+		id?: string;
 	};
 	/** Duration of the track **in seconds** */
 	duration: number;
@@ -138,7 +139,7 @@ export class MusicTrack {
 	/** Array of media urls. May be empty in the case that the service does not provide streaming. */
 	audio: Audio[];
 	/** An array of the authors of the music track. For example, a YouTube channel or SoundCloud user profile */
-	author: Author[];
+	authors: Author[];
 	/**
 	 * Original data retreieved from request to service's API.
 	 * For debug and if theres any data not included in MusicTrack itself thats needed.
@@ -159,7 +160,6 @@ export class MusicTrack {
 	constructor(data: MusicTrackConstructor) {
 		this.name = data.name || "Unnamed MusicTrack";
 		this.url = data.url;
-		this.id = data.id;
 		this.thumbnail = data.thumbnail;
 		this.duration = data.duration || 0;
 		this.durationTimestamp = getTimeFromSeconds(data.duration || 0);
@@ -168,10 +168,11 @@ export class MusicTrack {
 		this.service = data.service;
 		this.audio = data.audio || [];
 		if (!Array.isArray(data?.author)) data.author = [data.author];
-		this.author = data.author;
+		this.authors = data.author;
 		this.metadata = {
 			queuedBy: data.queuedBy || null,
 			explicit: data.explicit || false,
+			id: data.id,
 		};
 		this.originalData = data.originalData;
 	}
@@ -194,15 +195,24 @@ export class MusicTrack {
 	 * "-ac",
 	 * "2"
 	 * ```
+	 * @param audio Custom audio object to use instead of relying on {@link MusicTrack.bestAudio()}
 	 */
-	async resource(seek: number = 0, extraArgs?: any[]) {
-		if (this.duration === 0) throw "Track duration is 0";
-		if (seek < 0 || seek > this.duration) throw "Seek is out of range for track";
+	async resource(seek: number = 0, extraArgs?: any[], audio?: Audio) {
+		if (this.duration === 0) throw `Track duration is 0 for track: ${this.name}`;
+		if (seek < 0 || seek > this.duration) throw `Seek is out of range for track: ${this.name}`;
+		const url =
+			audio?.url ||
+			(await this.bestAudio()
+				.then(({ url }) => url)
+				.catch((err) => {
+					throw err;
+				}));
+		if (!url) throw `Cannot get streaming URL for ${this.name}`;
 		const args: any[] = [
 			"-ss",
 			seek,
 			"-i",
-			(await this.bestAudio()).url,
+			url,
 			// Do we analyze the duration????
 			// "-analyzeduration",
 			// "0",
@@ -220,6 +230,14 @@ export class MusicTrack {
 		];
 		if (extraArgs) args.push(...extraArgs);
 
+		new prism.FFmpeg().on("error", (err) => {
+			debugLog(`FFmpeg streaming error for ${this.name}: ${err}`);
+		});
+
+		new prism.FFmpeg().on("end", () => {
+			debugLog(`FFmpeg streaming ended for ${this.name}`);
+		});
+
 		return new prism.FFmpeg({ args: args });
 	}
 
@@ -228,8 +246,9 @@ export class MusicTrack {
 	 * **Note:** if SoundCloud is the service, `Audio.url` is changed to a time sensitive URL due to SoundCloud APIs.
 	 */
 	async bestAudio(): Promise<Audio> {
+		await this.fetchMissingAudio();
 		if (this.audio == undefined || this.audio?.length == 0)
-			throw new Error("MusicTrack does not contain any audios");
+			throw new Error("MusicTrack does not contain any audio streams");
 
 		if (this.service === Service.spotify) {
 			throw new Error(
@@ -260,7 +279,20 @@ export class MusicTrack {
 		}
 
 		if (this.service === Service.youtube) {
-			return this.audio[0];
+			await this.fetchMissingAudio();
+			let best = this.audio
+				.filter(
+					(a: Audio) =>
+						a.mimeType.includes("audio/mp3") ||
+						a.mimeType.includes("audio/mpeg") ||
+						a.mimeType.includes("audio/mp4")
+				)
+				.sort((a: Audio, b: Audio) => {
+					if (a.bitrate && b.bitrate) return a.bitrate - b?.bitrate;
+					return 0;
+				})?.[0];
+
+			return best;
 		}
 
 		if (this.service === Service.audiofile) {
@@ -271,19 +303,38 @@ export class MusicTrack {
 	}
 
 	/**
+	 * Adds neccessary audio data to MusicTrack in the case it was not added.
+	 */
+	async fetchMissingAudio() {
+		if (this.service !== Service.youtube) return;
+		if (this.audio && this.audio.length > 0) return;
+
+		let { data } = await axios.get(
+			`https://${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${
+				this.metadata.id || this.originalData.videoId
+			}?fields=adaptiveFormats`
+		);
+		if (!data) return;
+		debugLog(`FetchMissingAudio data:`, data);
+
+		this.audio = data.adaptiveFormats
+			.filter((f: any) => f.audioQuality != null)
+			.map((f: any) => {
+				return {
+					url: f.url,
+					quality: f.audioQuality,
+					mimeType: f.type,
+					bitrate: f.bitrate,
+				};
+			});
+	}
+
+	/**
 	 * Set who queued the track, for example the user's Discord ID
 	 */
 	setQueuedBy(queuedBy: any) {
 		this.metadata.queuedBy = queuedBy;
 		return this;
-	}
-
-	/**
-	 * Checks the track for missing data and fetches it. Useful for YouTube searches where the data doesn't return audios
-	 */
-	async fetchFullTrack() {
-		if (this.service === Service.youtube) {
-		}
 	}
 }
 
@@ -301,8 +352,8 @@ export interface MusicPlaylistConstructor {
 	id?: string;
 	/** URL of thumbnail */
 	thumbnail: string;
-	/** Author/artist of playlist */
-	author: Author[] | Author;
+	/** User(s) that created this playlist */
+	authors: Author[] | Author;
 	/** Duration of the track in seconds */
 	duration: number;
 	/** Reference of who queued the playlist */
@@ -324,13 +375,13 @@ export class MusicPlaylist {
 	url: string;
 	/** Name of the playlist */
 	name: string;
-	/** ID of the playlist */
-	id?: string;
 	metadata: {
 		/** A reference to the user that queued the playlist - Can be set via {@link MusicPlaylist.setQueuedBy} or modified manually */
 		queuedBy?: any;
 		/** Is the playlist collaborative/editable by other users on the platform?  */
 		collaborative?: boolean;
+		/** ID of the playlist on the platform */
+		id?: string;
 	};
 	/** Duration of all the tracks **in seconds** */
 	duration: number;
@@ -358,18 +409,18 @@ export class MusicPlaylist {
 	constructor(data: MusicPlaylistConstructor) {
 		this.url = data.url;
 		this.name = data.name;
-		this.id = data.id;
 		this.duration = data.duration;
 		this.durationTimestamp = getTimeFromSeconds(data.duration);
 		this.isAlbum = data.isAlbum || false;
 		this.tracks = data.tracks || [];
 		this.service = data.service;
 		this.thumbnail = data.thumbnail;
-		if (!Array.isArray(data?.author)) data.author = [data.author];
-		this.author = data.author;
+		if (!Array.isArray(data?.authors)) data.authors = [data.authors];
+		this.author = data.authors;
 		this.metadata = {
 			queuedBy: data.queuedBy,
 			collaborative: data.collaborative || false,
+			id: data.id,
 		};
 		this.originalData = data.originalData;
 	}
@@ -381,6 +432,11 @@ export class MusicPlaylist {
 		this.metadata.queuedBy = queuedBy;
 		return this;
 	}
+}
+
+export interface QueueConstructor {
+	/** Identifier for the queue */
+	id: string;
 }
 
 // TODO: queues

@@ -14,7 +14,7 @@ export const SPOTIFY_URL_PATTERN = /^((https:)?\/\/)?open.spotify.com\/(track|al
 /**
  * Returns {@link MusicTrack} or {@link MusicPlaylist} with data from Spotify from a given resource URL
  */
-export async function Spotify(url: string): Promise<MusicTrack | MusicPlaylist> {
+export async function Spotify_Info(url: string): Promise<MusicTrack | MusicPlaylist> {
 	url = url.trim();
 	if (!url.match(SPOTIFY_URL_PATTERN)) throw new Error(`Given URL is not a valid Spotify URL`);
 
@@ -72,7 +72,7 @@ export async function Spotify(url: string): Promise<MusicTrack | MusicPlaylist> 
 /**
  * Searches for a Spotify track or playlist and returns with an array of {@link MusicTrack} or {@link MusicPlaylist}
  */
-export async function SpotifySearch(
+export async function Spotify_Search(
 	query: string,
 	limit: number = 5,
 	type: "track" | "playlist" | "album" = "track"
@@ -108,4 +108,11 @@ export async function SpotifySearch(
 	}
 
 	throw new Error("Spotify returned unknown resource.");
+}
+
+/**
+ * Check a URL and validate if it is a Spotify URL
+ */
+export function Spotify_Validate(url: string) {
+	return url.match(SPOTIFY_URL_PATTERN);
 }

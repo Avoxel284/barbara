@@ -49,7 +49,7 @@ export function MusicPlaylistFromSoundCloud(data: any) {
 		url: data.url || data.permalink_url,
 		id: data.id,
 		duration: Number(data.duration) / 1000,
-		author: {
+		authors: {
 			url: data?.user?.permalink_url,
 			name: data?.user?.username,
 			avatar: data?.user?.avatar_url,

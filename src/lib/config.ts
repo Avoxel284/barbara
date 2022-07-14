@@ -26,6 +26,7 @@ const keys: any = {
 	},
 	YOUTUBE: {
 		COOKIE: "",
+		INVIDIOUSSITE: "https://vid.puffyan.us",
 	},
 	CONFIG: {
 		DEBUG: false,
@@ -130,19 +131,22 @@ export function setKeyFile(path: string, overwrite: boolean = true): void {
  * ```
  * // Get a free SoundCloud client ID and set it
  * barbara.setKey("SOUNDCLOUD_CLIENTID", await barbara.freeKey("SOUNDCLOUD_CLIENTID"));
+ *
+ * // Get a better Invidious API and set it
+ * barbara.setKey("YOUTUBE_INVIDIOUSAPI", await barbara.freeKey("YOUTUBE_INVIDIOUSAPI"));
  * ```
  *
  * Some code was ripped from play-dl
  * @async **Function is asynchronous!**
  */
-export async function freeKeys(key: string) {
+export async function freeKey(key: string) {
 	const k: string[] = key.split("_");
 	if (keys?.[k[0]]?.[k[1]] == null) throw new Error("Cannot find key: " + key);
 
 	if (k[0] === "SOUNDCLOUD") {
 		if (k[1] === "CLIENTID") {
 			const { data } = await axios.get("https://soundcloud.com/").catch((err: Error) => {
-				console.error("soundcloud free key fail");
+				console.error("An error occurred when attempting to fetch SoundCloud free key:");
 				throw err;
 			});
 			const urls: string[] = [];
@@ -153,6 +157,24 @@ export async function freeKeys(key: string) {
 				throw err;
 			});
 			return data2.split(',client_id:"')[1].split('"')[0];
+		}
+	}
+
+	if (k[0] === "YOUTUBE") {
+		if (k[1] === "INVIDIOUSAPI") {
+			const { data } = await axios
+				.get(`https://api.invidious.io/instances.json?pretty=0&sort_by=type,users`)
+				.catch((err: Error) => {
+					console.error("An error occurred when attempting to fetch Invidious api url:");
+					throw err;
+				});
+			if (!data) return;
+
+			const urls: string[] = [];
+			data.forEach((a: any) => {
+				if (a[1].api) urls.push(a[1].uri);
+			});
+			return urls[0];
 		}
 	}
 

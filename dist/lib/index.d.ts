@@ -1,8 +1,8 @@
 import prism from "prism-media";
 export interface SearchOptions {
-    service: Service;
+    service?: Service;
     limit?: number;
-    type: "tracks" | "playlists" | "albums";
+    type?: "tracks" | "videos" | "playlists" | "albums";
 }
 export declare type BarbaraType = MusicTrack | MusicPlaylist;
 export declare enum Service {
@@ -45,10 +45,10 @@ export interface MusicTrackConstructor {
 export declare class MusicTrack {
     url: string;
     name: string;
-    id?: string;
     metadata: {
         queuedBy?: any;
         explicit?: boolean;
+        id?: string;
     };
     duration: number;
     durationTimestamp: string;
@@ -57,20 +57,20 @@ export declare class MusicTrack {
     service: Service;
     thumbnail: string;
     audio: Audio[];
-    author: Author[];
+    authors: Author[];
     originalData?: any;
     constructor(data: MusicTrackConstructor);
-    resource(seek?: number, extraArgs?: any[]): Promise<prism.FFmpeg>;
+    resource(seek?: number, extraArgs?: any[], audio?: Audio): Promise<prism.FFmpeg>;
     bestAudio(): Promise<Audio>;
+    fetchMissingAudio(): Promise<void>;
     setQueuedBy(queuedBy: any): this;
-    fetchFullTrack(): Promise<void>;
 }
 export interface MusicPlaylistConstructor {
     name: string;
     url: string;
     id?: string;
     thumbnail: string;
-    author: Author[] | Author;
+    authors: Author[] | Author;
     duration: number;
     queuedBy?: any;
     isAlbum?: boolean;
@@ -82,10 +82,10 @@ export interface MusicPlaylistConstructor {
 export declare class MusicPlaylist {
     url: string;
     name: string;
-    id?: string;
     metadata: {
         queuedBy?: any;
         collaborative?: boolean;
+        id?: string;
     };
     duration: number;
     durationTimestamp: string;
@@ -97,6 +97,9 @@ export declare class MusicPlaylist {
     originalData?: any;
     constructor(data: MusicPlaylistConstructor);
     setQueuedBy(queuedBy: any): this;
+}
+export interface QueueConstructor {
+    id: string;
 }
 export declare class Queue {
     constructor(data?: any);

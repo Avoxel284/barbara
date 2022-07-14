@@ -14,15 +14,17 @@ import {
 	MusicTrackConstructor,
 	MusicPlaylistConstructor,
 } from "./lib";
-import { SoundCloud, SoundCloudSearch, SOUNDCLOUD_URL_PATTERN } from "./services/SoundCloud";
-import { YouTube, YouTubeSearch } from "./services/YouTube";
-import { Spotify, SpotifySearch, SPOTIFY_URL_PATTERN } from "./services/Spotify";
-import { setKey, freeKeys, getKey, setKeyFile } from "./lib/config";
-import { AudioFile, AUDIOFILE_URL_PATTERN } from "./services/Arbitrary";
+import { SoundCloud_Info, SoundCloud_Search, SoundCloud_Validate } from "./services/SoundCloud";
+import { YouTube_Info, YouTube_Search, YouTube_Validate } from "./services/YouTube";
+import { Spotify_Info, Spotify_Search, Spotify_Validate } from "./services/Spotify";
+import { setKey, freeKey, getKey, setKeyFile } from "./lib/config";
+import { AudioFile_Info, AudioFile_Validate, AUDIOFILE_URL_PATTERN } from "./services/Arbitrary";
 import { debugLog } from "./lib/util";
 
 /**
  * Searches for tracks with given query on SoundCloud, unless other service and type is specified in search options.
+ *
+ * Note: For YouTube, option.type = `tracks` and `videos` are the same thing.
  *
  * @param query Search query
  * @param options Search options
@@ -30,36 +32,40 @@ import { debugLog } from "./lib/util";
  */
 export async function search(
 	query: string,
-	options: SearchOptions
+	options: SearchOptions = {}
 ): Promise<MusicTrack[] | MusicPlaylist[]> {
 	let type: any;
-
-	options ??= {
-		service: Service.soundcloud,
-		type: "tracks",
-	};
+	options.limit ??= 1;
+	options.service ??= Service.youtube;
+	options.type ??= "tracks";
 
 	switch (options.service) {
 		case Service.soundcloud:
-			return await SoundCloudSearch(query, options.limit, options.type);
+			if (options.type == "videos") throw new Error("Videos do not exist on SoundCloud");
+			return await SoundCloud_Search(query, options.limit, options.type);
 			break;
 
 		case Service.spotify:
+			if (options.type == "videos") throw new Error("Videos do not exist on Spotify");
 			if (options.type == "albums") type = "album";
 			if (options.type == "playlists") type = "playlist";
 			if (options.type == "tracks") type = "track";
-			return await SpotifySearch(query, options.limit, type);
+			return await Spotify_Search(query, options.limit, type);
 			break;
 
 		case Service.youtube:
 			if (options.type == "albums") throw new Error("Albums do not exist on YouTube");
 			if (options.type == "playlists") type = "playlist";
-			if (options.type == "tracks") type = "video";
-			return await YouTubeSearch(query, options.limit, type);
+			if (options.type == "tracks" || options.type == "videos") type = "video";
+			return await YouTube_Search(query, options.limit, type);
+			break;
+
+		case Service.audiofile:
+			throw "Bro really thought they could search for audio files";
 			break;
 	}
 
-	throw new Error("Invalid service");
+	throw new Error("Interesting how its impossible for this error to ever occur");
 }
 
 /**
@@ -70,9 +76,10 @@ export async function search(
 export async function serviceFromURL(url: string): Promise<Service | undefined> {
 	url = url.trim();
 	if (url.length === 0) return;
-	if (url.match(SOUNDCLOUD_URL_PATTERN)) return Service.soundcloud;
-	if (url.match(SPOTIFY_URL_PATTERN)) return Service.spotify;
-	if (url.match(AUDIOFILE_URL_PATTERN)) return Service.audiofile;
+	if (YouTube_Validate(url)) return Service.youtube;
+	if (SoundCloud_Validate(url)) return Service.soundcloud;
+	if (Spotify_Validate(url)) return Service.spotify;
+	if (AudioFile_Validate(url)) return Service.audiofile;
 }
 
 /**
@@ -93,20 +100,20 @@ export async function info(url: string): Promise<MusicTrack | MusicPlaylist> {
 
 	switch (service) {
 		case Service.soundcloud:
-			return SoundCloud(url).catch((err) => {
+			return SoundCloud_Info(url).catch((err) => {
 				throw err;
 			});
 
 		case Service.spotify:
-			return Spotify(url);
+			return Spotify_Info(url);
 			break;
 
 		case Service.youtube:
-			return YouTube(url);
+			return YouTube_Info(url);
 			break;
 
 		case Service.audiofile:
-			return AudioFile(url, {});
+			return AudioFile_Info(url, {});
 			break;
 	}
 
@@ -118,5 +125,5 @@ export { SearchOptions, Audio, Author, MusicTrackConstructor, MusicPlaylistConst
 export { Service };
 // export { SoundCloud };
 // export { Spotify };
-export { setKey, freeKeys, getKey, setKeyFile };
+export { setKey, freeKey as freeKeys, getKey, setKeyFile };
 // export { YouTube, YouTubeSearch };

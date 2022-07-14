@@ -6,14 +6,14 @@
 			"program": "${workspaceFolder}/examples/barbara.js",
 			"request": "launch",
 			"skipFiles": ["<node_internals>/**"],
-			"type": "node"
+			"type": "node",
 		},
 		{
 			"name": "Test Discord Voice example",
 			"program": "${workspaceFolder}/examples/discordvoice.js",
 			"request": "launch",
 			"skipFiles": ["<node_internals>/**"],
-			"type": "node"
+			"type": "node",
 		},
 		{
 			"type": "node",

@@ -3,12 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SpotifySearch = exports.Spotify = exports.SPOTIFY_URL_PATTERN = void 0;
+exports.Spotify_Validate = exports.Spotify_Search = exports.Spotify_Info = exports.SPOTIFY_URL_PATTERN = void 0;
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
 const config_1 = require("../../lib/config");
 exports.SPOTIFY_URL_PATTERN = /^((https:)?\/\/)?open.spotify.com\/(track|album|playlist)\//;
-async function Spotify(url) {
+async function Spotify_Info(url) {
     url = url.trim();
     if (!url.match(exports.SPOTIFY_URL_PATTERN))
         throw new Error(`Given URL is not a valid Spotify URL`);
@@ -53,8 +53,8 @@ async function Spotify(url) {
     }
     throw new Error("Spotify returned unknown resource.");
 }
-exports.Spotify = Spotify;
-async function SpotifySearch(query, limit = 5, type = "track") {
+exports.Spotify_Info = Spotify_Info;
+async function Spotify_Search(query, limit = 5, type = "track") {
     if (!query)
         throw new Error("No query given!");
     if (limit > 50 || limit < 0)
@@ -79,5 +79,9 @@ async function SpotifySearch(query, limit = 5, type = "track") {
     }
     throw new Error("Spotify returned unknown resource.");
 }
-exports.SpotifySearch = SpotifySearch;
+exports.Spotify_Search = Spotify_Search;
+function Spotify_Validate(url) {
+    return url.match(exports.SPOTIFY_URL_PATTERN);
+}
+exports.Spotify_Validate = Spotify_Validate;
 //# sourceMappingURL=index.js.map

@@ -1,10 +1,10 @@
 <img src="media://Banner.png">
 
-<b> [GitHub Repo](https://github.com/Avoxel284/barbara) | [Examples](https://github.com/Avoxel284/barbara/examples) | [Cheatsheet](https://github.com/Avoxel284/barbara/cheatsheet.md)</b>
+<b> [GitHub Repo](https://github.com/Avoxel284/barbara) | [Examples](https://github.com/Avoxel284/barbara/tree/master/examples) | [Cheatsheet](https://github.com/Avoxel284/barbara/blob/master/CHEATSHEET.md)</b>
 
 ## WORK IN PROGRESS!
 
-Library is nowhere near finished! Use at your own risk.
+Library is in development, use at your own risk.
 
 ## Instant guide
 
