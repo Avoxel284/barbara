@@ -6,5 +6,5 @@ export declare function info(url: string): Promise<MusicTrack | MusicPlaylist>;
 export { MusicTrack, MusicPlaylist };
 export { SearchOptions, Audio, Author, MusicTrackConstructor, MusicPlaylistConstructor };
 export { Service };
-export { setKey, freeKey as freeKeys, getKey, setKeyFile };
+export { setKey, freeKey, getKey, setKeyFile };
 //# sourceMappingURL=index.d.ts.map

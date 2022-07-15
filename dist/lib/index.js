@@ -115,7 +115,7 @@ class MusicTrack {
             return;
         if (this.audio && this.audio.length > 0)
             return;
-        let { data } = await axios_1.default.get(`https://${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${this.metadata.id || this.originalData.videoId}?fields=adaptiveFormats`);
+        let { data } = await axios_1.default.get(`${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${this.metadata.id || this.originalData.videoId}?fields=adaptiveFormats`);
         if (!data)
             return;
         (0, util_1.debugLog)(`FetchMissingAudio data:`, data);

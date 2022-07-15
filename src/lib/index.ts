@@ -310,7 +310,7 @@ export class MusicTrack {
 		if (this.audio && this.audio.length > 0) return;
 
 		let { data } = await axios.get(
-			`https://${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${
+			`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${
 				this.metadata.id || this.originalData.videoId
 			}?fields=adaptiveFormats`
 		);

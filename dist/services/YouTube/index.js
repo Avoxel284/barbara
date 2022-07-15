@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.YouTube_Validate = exports.YouTube_Search = exports.YouTube_Info = void 0;
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
+const util_1 = require("../../lib/util");
 const config_1 = require("../../lib/config");
 const PLAYLIST_ID_PATTERN = /^(PL|UU|LL|RD|OL)[a-zA-Z\d_-]{10,}$/;
 const PLAYLIST_URL_PATTERN = /^((?:https?:)?\/\/)?(?:(?:www|m|music)\.)?(youtube\.com)\/(?:(playlist|watch))(.*)?((\?|\&)list=)(PL|UU|LL|RD|OL)[a-zA-Z\d_-]{10,}(.*)?$/;
@@ -28,6 +29,7 @@ async function YouTube_Info(url) {
 }
 exports.YouTube_Info = YouTube_Info;
 async function YouTube_Search(query, limit = 10, type = "video") {
+    (0, util_1.debugLog)(`Invidious API URL key: ${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}`);
     let { data } = await axios_1.default.get(`${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}/api/v1/search?q=${encodeURIComponent(query)}&type=${type}`);
     return data.map(parse_1.MusicTrackFromYouTube);
 }

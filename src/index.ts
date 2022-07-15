@@ -125,5 +125,5 @@ export { SearchOptions, Audio, Author, MusicTrackConstructor, MusicPlaylistConst
 export { Service };
 // export { SoundCloud };
 // export { Spotify };
-export { setKey, freeKey as freeKeys, getKey, setKeyFile };
+export { setKey, freeKey, getKey, setKeyFile };
 // export { YouTube, YouTubeSearch };

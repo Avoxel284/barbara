@@ -1,10 +1,15 @@
 {
 	"name": "barbara-music",
-	"version": "0.0.13",
-	"description": "A music playing module for Discord Bots. Used by Norikobot",
+	"version": "0.0.19",
+	"description": "Unified MusicTrack for easy audio streaming. Built for music-playing Discord bots in mind.",
 	"main": "dist/index",
 	"scripts": {
-		"test": "examples/barbara.js"
+		"test": "examples/barbara.js",
+		"example1": "examples/discordvoice.js",
+		"bintest": "bin/index.js"
+	},
+	"bin": {
+		"barbaramusic": "bin/index.js"
 	},
 	"typings": "dist/index",
 	"repository": {
@@ -23,6 +28,7 @@
 	"homepage": "https://github.com/Avoxel284/barbara#readme",
 	"dependencies": {
 		"axios": "^0.27.2",
+		"inquirer": "^9.0.1",
 		"music-metadata": "^7.12.4",
 		"prism-media": "^1.3.4"
 	},

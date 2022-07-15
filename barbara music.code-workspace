@@ -5,12 +5,6 @@
 		},
 		{
 			"path": "src"
-		},
-		{
-			"path": "../Downloads/play-dl-main/play-dl"
 		}
-	],
-	"settings": {
-		"ionic.liveReload": false
-	}
+	]
 }

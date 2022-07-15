@@ -31,9 +31,7 @@ export async function YouTube_Info(url: string): Promise<MusicTrack | MusicPlayl
 		videoId = url.split("youtube.com/playlist?list=")[1].split(/(\?|\/|&)/)[0];
 	else videoId = (url.split("watch?v=")[1] ?? url.split("&v=")[1]).split(/(\?|\/|&)/)[0];
 
-	let { data } = await axios.get(
-		`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${videoId}`
-	);
+	let { data } = await axios.get(`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${videoId}`);
 
 	return MusicTrackFromYouTube(data);
 }
@@ -47,10 +45,9 @@ export async function YouTube_Search(
 	limit: number = 10,
 	type: "video" | "playlist" = "video"
 ): Promise<MusicTrack[] | MusicPlaylist[]> {
+	debugLog(`Invidious API URL key: ${getKey("YOUTUBE_INVIDIOUSSITE")}`);
 	let { data } = await axios.get(
-		`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/search?q=${encodeURIComponent(
-			query
-		)}&type=${type}`
+		`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/search?q=${encodeURIComponent(query)}&type=${type}`
 	);
 
 	return data.map(MusicTrackFromYouTube);
