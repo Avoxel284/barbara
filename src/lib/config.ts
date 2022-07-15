@@ -161,7 +161,7 @@ export async function freeKey(key: string) {
 	}
 
 	if (k[0] === "YOUTUBE") {
-		if (k[1] === "INVIDIOUSAPI") {
+		if (k[1] === "INVIDIOUSSITE") {
 			const { data } = await axios
 				.get(`https://api.invidious.io/instances.json?pretty=0&sort_by=type,users`)
 				.catch((err: Error) => {

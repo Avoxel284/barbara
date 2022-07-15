@@ -25,7 +25,7 @@ Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, and `freeKey(<Key ID>)`
 ### YouTube
 
 - **Cookie** - `YOUTUBE_COOKIE` <br> Provide a cookie string for accessing consent-required content
-- **Invidious API URL** - `YOUTUBE_INVIDIOUSAPI` <br> Provide a different API URL for Invidious. Using `freeKey` is recommended.
+- **Invidious site URL** - `YOUTUBE_INVIDIOUSSITE` <br> Provide a different Invidous site URL. Using `freeKey` is recommended.
 
 ### Configuration
 

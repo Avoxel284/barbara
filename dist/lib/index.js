@@ -59,6 +59,8 @@ class MusicTrack {
             "-ac",
             "2",
         ];
+        if (audio?.bitrate)
+            args.push("-b:a", audio.bitrate);
         if (extraArgs)
             args.push(...extraArgs);
         new prism_media_1.default.FFmpeg().on("error", (err) => {
@@ -100,10 +102,25 @@ class MusicTrack {
                 a.mimeType.includes("audio/mp4"))
                 .sort((a, b) => {
                 if (a.bitrate && b.bitrate)
-                    return a.bitrate - b?.bitrate;
+                    return b.bitrate - a.bitrate;
                 return 0;
-            })?.[0];
-            return best;
+            })
+                .sort((a, b) => {
+                let qualityToInt = (quality) => {
+                    if (quality?.includes("HIGH"))
+                        return 3;
+                    if (quality?.includes("MED"))
+                        return 2;
+                    if (quality?.includes("LOW"))
+                        return 1;
+                    return 1;
+                };
+                if (a.quality != undefined && b.quality != undefined)
+                    return qualityToInt(b.quality) - qualityToInt(a.quality);
+                return 0;
+            });
+            (0, util_1.debugLog)(`Ranking YouTube best audio:`, best);
+            return best?.[0];
         }
         if (this.service === Service.audiofile) {
             return this.audio[0];
