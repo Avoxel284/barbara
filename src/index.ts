@@ -22,6 +22,7 @@ import { setKey, freeKey, getKey, setKeyFile, setKeys } from "./lib/config";
 import { AudioFile_Info, AudioFile_Validate, AUDIOFILE_URL_PATTERN } from "./services/Arbitrary";
 import { debugLog } from "./lib/util";
 import { searchGeniusSong, fetchGeniusSongLyrics } from "./lib/genius";
+import { refreshTokens } from "./lib/auth";
 
 /**
  * Searches for tracks with given query on SoundCloud, unless other service and type is specified in search options.
@@ -127,6 +128,6 @@ export { SearchOptions, Audio, Author, MusicTrackConstructor, MusicPlaylistConst
 export { Service };
 // export { SoundCloud };
 // export { Spotify };
-export { setKey, freeKey, getKey, setKeyFile, setKeys };
+export { setKey, freeKey, getKey, setKeyFile, setKeys, refreshTokens };
 export { searchGeniusSong, fetchGeniusSongLyrics, GeniusSong };
 // export { YouTube, YouTubeSearch };

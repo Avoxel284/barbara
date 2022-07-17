@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchGeniusSongLyrics = exports.searchGeniusSong = exports.setKeys = exports.setKeyFile = exports.getKey = exports.freeKey = exports.setKey = exports.Service = exports.MusicPlaylist = exports.MusicTrack = exports.info = exports.serviceFromURL = exports.search = void 0;
+exports.fetchGeniusSongLyrics = exports.searchGeniusSong = exports.refreshTokens = exports.setKeys = exports.setKeyFile = exports.getKey = exports.freeKey = exports.setKey = exports.Service = exports.MusicPlaylist = exports.MusicTrack = exports.info = exports.serviceFromURL = exports.search = void 0;
 const lib_1 = require("./lib");
 Object.defineProperty(exports, "MusicTrack", { enumerable: true, get: function () { return lib_1.MusicTrack; } });
 Object.defineProperty(exports, "MusicPlaylist", { enumerable: true, get: function () { return lib_1.MusicPlaylist; } });
@@ -19,6 +19,8 @@ const util_1 = require("./lib/util");
 const genius_1 = require("./lib/genius");
 Object.defineProperty(exports, "searchGeniusSong", { enumerable: true, get: function () { return genius_1.searchGeniusSong; } });
 Object.defineProperty(exports, "fetchGeniusSongLyrics", { enumerable: true, get: function () { return genius_1.fetchGeniusSongLyrics; } });
+const auth_1 = require("./lib/auth");
+Object.defineProperty(exports, "refreshTokens", { enumerable: true, get: function () { return auth_1.refreshTokens; } });
 async function search(query, options = {}) {
     let type;
     options.limit ??= 1;

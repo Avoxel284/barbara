@@ -86,7 +86,7 @@ class MusicTrack {
             this.audio = [];
             let resolvedTrack = await this.resolveUnstreamableTrack();
             if (!resolvedTrack)
-                throw "Cannot find Spotify track on alternative sources";
+                throw "Could not find Spotify track on alternative sources";
             this.audio = resolvedTrack.audio;
             this.metadata.resolvedTo = resolvedTrack.service;
             let best = this.audio
@@ -199,7 +199,7 @@ class MusicTrack {
     }
     async resolveUnstreamableTrack() {
         if (this.service === Service.spotify) {
-            let yt = (await (0, YouTube_1.YouTube_Search)(`${this.name} ${this.authors.join(" ")}`, 1, "video"))?.[0];
+            let yt = (await (0, YouTube_1.YouTube_Search)(`${this.name} ${this.authors.map((v) => v.name).join(" ")}`, 1, "video"))?.[0];
             if (yt instanceof MusicTrack)
                 return yt;
         }

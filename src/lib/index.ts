@@ -290,7 +290,7 @@ export class MusicTrack {
 			this.audio = [];
 
 			let resolvedTrack = await this.resolveUnstreamableTrack();
-			if (!resolvedTrack) throw "Cannot find Spotify track on alternative sources";
+			if (!resolvedTrack) throw "Could not find Spotify track on alternative sources";
 
 			this.audio = resolvedTrack.audio;
 			this.metadata.resolvedTo = resolvedTrack.service;
@@ -424,7 +424,13 @@ export class MusicTrack {
 	async resolveUnstreamableTrack() {
 		if (this.service === Service.spotify) {
 			// TODO: maybe use fuse.js to get a more accurate search
-			let yt = (await YouTube_Search(`${this.name} ${this.authors.join(" ")}`, 1, "video"))?.[0];
+			let yt = (
+				await YouTube_Search(
+					`${this.name} ${this.authors.map((v) => v.name).join(" ")}`,
+					1,
+					"video"
+				)
+			)?.[0];
 			if (yt instanceof MusicTrack) return yt;
 		}
 
@@ -432,7 +438,7 @@ export class MusicTrack {
 	}
 
 	/**
-	 * Searches for the track on Genius and returns a {@link GeniusSong}. Contains data such as lyrics.
+	 * Searches for the track on Genius and returns a {@link GeniusSong}. Contains data including lyrics.
 	 */
 	async getGeniusSong(): Promise<GeniusSong | null> {
 		let title = this.name.toLowerCase().replace(/(\(|)lyrics(\)|)/g, "");

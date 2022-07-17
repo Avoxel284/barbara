@@ -7,6 +7,7 @@
 
 import axios from "axios";
 import fs from "fs";
+import { authenticateKey } from "./auth";
 import { debugLog } from "./util";
 
 const keys: any = {
@@ -14,15 +15,12 @@ const keys: any = {
 		CLIENTID: "",
 	},
 	SPOTIFY: {
-		APIKEY: "",
 		CLIENTID: "",
 		CLIENTSECRET: "",
-		AUTHORIZATIONCODE: "",
 		ACCESSTOKEN: "",
-		REFRESHTOKEN: "",
 		TOKENTYPE: "",
-		EXPIRY: "",
-		MARKETCODE: "",
+		TOKENEXPIRY: "",
+		MARKETCODE: "AU",
 	},
 	YOUTUBE: {
 		COOKIE: "",
@@ -35,6 +33,7 @@ const keys: any = {
 	CONFIG: {
 		DEBUG: false,
 		FILE: "",
+		AUTOREFRESH: true,
 	},
 };
 
@@ -90,6 +89,7 @@ export function setKey(key: string, value: string): void {
 	const k: string[] = key.split("_");
 	if (keys?.[k[0]]?.[k[1]] == null) throw new Error("Cannot find key to set: " + key);
 	keys[k[0]][k[1]] = value;
+	authenticateKey(k[0]);
 }
 
 /**

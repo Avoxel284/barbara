@@ -6,20 +6,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.freeKey = exports.setKeyFile = exports.setKeys = exports.setKey = exports.getKey = void 0;
 const axios_1 = __importDefault(require("axios"));
 const fs_1 = __importDefault(require("fs"));
+const auth_1 = require("./auth");
 const keys = {
     SOUNDCLOUD: {
         CLIENTID: "",
     },
     SPOTIFY: {
-        APIKEY: "",
         CLIENTID: "",
         CLIENTSECRET: "",
-        AUTHORIZATIONCODE: "",
         ACCESSTOKEN: "",
-        REFRESHTOKEN: "",
         TOKENTYPE: "",
-        EXPIRY: "",
-        MARKETCODE: "",
+        TOKENEXPIRY: "",
+        MARKETCODE: "AU",
     },
     YOUTUBE: {
         COOKIE: "",
@@ -32,6 +30,7 @@ const keys = {
     CONFIG: {
         DEBUG: false,
         FILE: "",
+        AUTOREFRESH: true,
     },
 };
 function getKey(key) {
@@ -46,6 +45,7 @@ function setKey(key, value) {
     if (keys?.[k[0]]?.[k[1]] == null)
         throw new Error("Cannot find key to set: " + key);
     keys[k[0]][k[1]] = value;
+    (0, auth_1.authenticateKey)(k[0]);
 }
 exports.setKey = setKey;
 function setKeys(ks) {
