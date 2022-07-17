@@ -8,6 +8,8 @@ const util_1 = require("./util");
 const prism_media_1 = __importDefault(require("prism-media"));
 const axios_1 = __importDefault(require("axios"));
 const config_1 = require("./config");
+const YouTube_1 = require("../services/YouTube");
+const genius_1 = require("./genius");
 var Service;
 (function (Service) {
     Service["spotify"] = "spotify";
@@ -33,6 +35,7 @@ class MusicTrack {
             queuedBy: data.queuedBy || null,
             explicit: data.explicit || false,
             id: data.id,
+            resolvedTo: data.resolvedTo || false,
         };
         this.originalData = data.originalData;
     }
@@ -63,6 +66,9 @@ class MusicTrack {
             args.push("-b:a", audio.bitrate);
         if (extraArgs)
             args.push(...extraArgs);
+        if (!extraArgs?.includes("-ar"))
+            args.push("-ar", "48000");
+        (0, util_1.debugLog)(`MusicTrack FFmpeg args:`, args);
         new prism_media_1.default.FFmpeg().on("error", (err) => {
             (0, util_1.debugLog)(`FFmpeg streaming error for ${this.name}: ${err}`);
         });
@@ -76,27 +82,15 @@ class MusicTrack {
         if (this.audio == undefined || this.audio?.length == 0)
             throw new Error("MusicTrack does not contain any audio streams");
         if (this.service === Service.spotify) {
-            throw new Error("Spotify does not provide streaming, thus cannot return audio." +
-                " Try searching for a similar track on a different service.");
-        }
-        if (this.service === Service.soundcloud) {
-            (0, util_1.debugLog)(this.audio);
+            (0, util_1.debugLog)(`Searching for Spotify track on alternative sources`);
+            this.audio = [];
+            let resolvedTrack = await this.resolveUnstreamableTrack();
+            if (!resolvedTrack)
+                throw "Cannot find Spotify track on alternative sources";
+            this.audio = resolvedTrack.audio;
+            this.metadata.resolvedTo = resolvedTrack.service;
             let best = this.audio
-                .filter((a) => (a.mimeType ? a.mimeType.includes("audio/mpeg") : false))
-                .filter((a) => a.protocol?.includes("progressive"))
-                .filter((a) => a.quality
-                ? a.quality.includes("sq") || a.quality.includes("medium") || a.quality.includes("low")
-                : false)?.[0];
-            (0, util_1.debugLog)(best);
-            let { data } = await axios_1.default.get(`${best.url}`).catch((err) => {
-                throw err;
-            });
-            best.url = data.url;
-            return best;
-        }
-        if (this.service === Service.youtube) {
-            await this.fetchMissingAudio();
-            let best = this.audio
+                .filter((a) => a.url != undefined)
                 .filter((a) => a.mimeType.includes("audio/mp3") ||
                 a.mimeType.includes("audio/mpeg") ||
                 a.mimeType.includes("audio/mp4"))
@@ -109,7 +103,62 @@ class MusicTrack {
                 let qualityToInt = (quality) => {
                     if (quality?.includes("HIGH"))
                         return 3;
-                    if (quality?.includes("MED"))
+                    if (quality?.includes("MEDIUM"))
+                        return 2;
+                    if (quality?.includes("LOW"))
+                        return 1;
+                    return 1;
+                };
+                if (a.quality != undefined && b.quality != undefined)
+                    return qualityToInt(b.quality) - qualityToInt(a.quality);
+                return 0;
+            });
+            return best?.[0];
+        }
+        if (this.service === Service.soundcloud) {
+            (0, util_1.debugLog)(this.audio);
+            let best = this.audio
+                .filter((a) => a.url != undefined)
+                .filter((a) => a.mimeType.includes("audio/mpeg") || a.mimeType.includes("audio/ogg"))
+                .filter((a) => a.protocol?.includes("progressive"))
+                .sort((a, b) => {
+                let qualityToInt = (quality) => {
+                    if (quality?.includes("sq"))
+                        return 3;
+                    if (quality?.includes("medium"))
+                        return 2;
+                    if (quality?.includes("low"))
+                        return 1;
+                    return 1;
+                };
+                if (a.quality != undefined && b.quality != undefined)
+                    return qualityToInt(b.quality) - qualityToInt(a.quality);
+                return 0;
+            })?.[0];
+            (0, util_1.debugLog)(best);
+            let { data } = await axios_1.default.get(`${best.url}`).catch((err) => {
+                throw err;
+            });
+            best.url = data.url;
+            return best;
+        }
+        if (this.service === Service.youtube) {
+            await this.fetchMissingAudio();
+            let best = this.audio
+                .filter((a) => a.url != undefined)
+                .filter((a) => a.mimeType.includes("audio/mp3") ||
+                a.mimeType.includes("audio/mpeg") ||
+                a.mimeType.includes("audio/mp4"))
+                .sort((a, b) => {
+                if (a.bitrate && b.bitrate)
+                    return b.bitrate - a.bitrate;
+                return 0;
+            })
+                .sort((a, b) => {
+                let qualityToInt = (quality) => {
+                    if (quality?.includes("HIGH"))
+                        return 3;
+                    if (quality?.includes("MEDIUM"))
                         return 2;
                     if (quality?.includes("LOW"))
                         return 1;
@@ -128,24 +177,42 @@ class MusicTrack {
         throw new Error("An error occurred when attempting to find best audio");
     }
     async fetchMissingAudio() {
-        if (this.service !== Service.youtube)
-            return;
         if (this.audio && this.audio.length > 0)
             return;
-        let { data } = await axios_1.default.get(`${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${this.metadata.id || this.originalData.videoId}?fields=adaptiveFormats`);
-        if (!data)
-            return;
-        (0, util_1.debugLog)(`FetchMissingAudio data:`, data);
-        this.audio = data.adaptiveFormats
-            .filter((f) => f.audioQuality != null)
-            .map((f) => {
-            return {
-                url: f.url,
-                quality: f.audioQuality,
-                mimeType: f.type,
-                bitrate: f.bitrate,
-            };
-        });
+        if (this.service === Service.youtube) {
+            let { data } = await axios_1.default.get(`${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${this.metadata.id || this.originalData.videoId}?fields=adaptiveFormats`);
+            if (!data)
+                return;
+            (0, util_1.debugLog)(`FetchMissingAudio data:`, data);
+            this.audio = data.adaptiveFormats
+                .filter((f) => f.audioQuality != null)
+                .map((f) => {
+                return {
+                    url: f.url,
+                    quality: f.audioQuality,
+                    mimeType: f.type,
+                    bitrate: f.bitrate,
+                };
+            });
+        }
+        return;
+    }
+    async resolveUnstreamableTrack() {
+        if (this.service === Service.spotify) {
+            let yt = (await (0, YouTube_1.YouTube_Search)(`${this.name} ${this.authors.join(" ")}`, 1, "video"))?.[0];
+            if (yt instanceof MusicTrack)
+                return yt;
+        }
+        return null;
+    }
+    async getGeniusSong() {
+        let title = this.name.toLowerCase().replace(/(\(|)lyrics(\)|)/g, "");
+        let song = (await (0, genius_1.searchGeniusSong)(`${title} ${this.authors[0].name}`)) ||
+            (await (0, genius_1.searchGeniusSong)(`${title}`));
+        if (!song)
+            return null;
+        song.lyrics = ["Lyrics not implemented atm"] || [];
+        return song;
     }
     setQueuedBy(queuedBy) {
         this.metadata.queuedBy = queuedBy;

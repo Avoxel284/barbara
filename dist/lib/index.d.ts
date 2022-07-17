@@ -27,6 +27,17 @@ export interface Author {
     id?: string;
     verified?: boolean;
 }
+export interface GeniusSong {
+    lyrics?: string[];
+    url: string;
+    pyongs?: number;
+    title: string;
+    name: string;
+    artist: Author;
+    thumbnail: string;
+    id: number;
+    lyricsState: string;
+}
 export interface MusicTrackConstructor {
     name: string;
     url: string;
@@ -38,6 +49,7 @@ export interface MusicTrackConstructor {
     live?: boolean;
     explicit?: any;
     playlisted?: boolean;
+    resolvedTo?: Service;
     service: Service;
     audio?: Audio[];
     originalData: any;
@@ -49,6 +61,7 @@ export declare class MusicTrack {
         queuedBy?: any;
         explicit?: boolean;
         id?: string;
+        resolvedTo: Service | false;
     };
     duration: number;
     durationTimestamp: string;
@@ -63,6 +76,8 @@ export declare class MusicTrack {
     resource(seek?: number, extraArgs?: any[], audio?: Audio): Promise<prism.FFmpeg>;
     bestAudio(): Promise<Audio>;
     fetchMissingAudio(): Promise<void>;
+    resolveUnstreamableTrack(): Promise<MusicTrack | null>;
+    getGeniusSong(): Promise<GeniusSong | null>;
     setQueuedBy(queuedBy: any): this;
 }
 export interface MusicPlaylistConstructor {

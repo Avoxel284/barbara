@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.freeKey = exports.setKeyFile = exports.setKey = exports.getKey = void 0;
+exports.freeKey = exports.setKeyFile = exports.setKeys = exports.setKey = exports.getKey = void 0;
 const axios_1 = __importDefault(require("axios"));
 const fs_1 = __importDefault(require("fs"));
 const keys = {
@@ -25,6 +25,10 @@ const keys = {
         COOKIE: "",
         INVIDIOUSSITE: "https://vid.puffyan.us",
     },
+    GENIUS: {
+        TOKEN: "",
+        LYRICSCACHING: true,
+    },
     CONFIG: {
         DEBUG: false,
         FILE: "",
@@ -44,6 +48,29 @@ function setKey(key, value) {
     keys[k[0]][k[1]] = value;
 }
 exports.setKey = setKey;
+function setKeys(ks) {
+    for (let [a, b] of Object.entries(ks)) {
+        a = a.toUpperCase();
+        if (a.includes("_") && typeof b !== "object") {
+            let k = a.split("_");
+            k[0] = k[0].toUpperCase();
+            k[1] = k[1].toUpperCase();
+            if (keys[k[0]]?.[k[1]] === undefined)
+                continue;
+            keys[k[0]][k[1]] = b;
+            continue;
+        }
+        if (keys[a] === undefined)
+            continue;
+        for (let [c, v] of Object.entries(b)) {
+            c = c.toUpperCase();
+            if (keys[a]?.[c] === undefined)
+                continue;
+            keys[a][c] = v;
+        }
+    }
+}
+exports.setKeys = setKeys;
 function setKeyFile(path, overwrite = true) {
     if (!path || !path.match(/^(.+)\/([^\/]+)$/))
         throw "Given Barbara key configuration file path is invalid!";
@@ -58,7 +85,7 @@ function setKeyFile(path, overwrite = true) {
                 continue;
             for (let [c, v] of Object.entries(b)) {
                 c = c.toUpperCase();
-                if (keys[a][c] === undefined)
+                if (keys[a]?.[c] === undefined)
                     continue;
                 if (keys[a][c] && overwrite == false)
                     continue;

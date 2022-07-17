@@ -13,13 +13,15 @@ import {
 	Queue,
 	MusicTrackConstructor,
 	MusicPlaylistConstructor,
+	GeniusSong,
 } from "./lib";
 import { SoundCloud_Info, SoundCloud_Search, SoundCloud_Validate } from "./services/SoundCloud";
 import { YouTube_Info, YouTube_Search, YouTube_Validate } from "./services/YouTube";
 import { Spotify_Info, Spotify_Search, Spotify_Validate } from "./services/Spotify";
-import { setKey, freeKey, getKey, setKeyFile } from "./lib/config";
+import { setKey, freeKey, getKey, setKeyFile, setKeys } from "./lib/config";
 import { AudioFile_Info, AudioFile_Validate, AUDIOFILE_URL_PATTERN } from "./services/Arbitrary";
 import { debugLog } from "./lib/util";
+import { searchGeniusSong, fetchGeniusSongLyrics } from "./lib/genius";
 
 /**
  * Searches for tracks with given query on SoundCloud, unless other service and type is specified in search options.
@@ -125,5 +127,6 @@ export { SearchOptions, Audio, Author, MusicTrackConstructor, MusicPlaylistConst
 export { Service };
 // export { SoundCloud };
 // export { Spotify };
-export { setKey, freeKey, getKey, setKeyFile };
+export { setKey, freeKey, getKey, setKeyFile, setKeys };
+export { searchGeniusSong, fetchGeniusSongLyrics, GeniusSong };
 // export { YouTube, YouTubeSearch };

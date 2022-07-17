@@ -18,6 +18,8 @@ async function SoundCloud_Info(url) {
         .catch((err) => {
         throw err;
     });
+    if (data.streamable === false)
+        throw "SoundCloud track cannot be streamed";
     if (data.kind === "track") {
         return (0, parse_1.MusicTrackFromSoundCloud)(data);
     }
@@ -33,13 +35,23 @@ async function SoundCloud_Search(query, limit = 20, type = "tracks") {
         throw new Error("SoundCloud Client ID is not set!");
     if (!query)
         throw new Error("No query given!");
+    if (limit < 5)
+        limit = 5;
     const { data } = await axios_1.default
         .get(`https://api-v2.soundcloud.com/search/${type}?q=${encodeURIComponent(query)}&client_id=${clientId}&limit=${limit}`)
         .catch((err) => {
         throw err;
     });
     if (type === "tracks") {
-        return data.collection.map((d) => (0, parse_1.MusicTrackFromSoundCloud)(d));
+        return data.collection
+            .filter((d) => {
+            if (d?.monetization_model && d?.monetization_model.includes("SUB"))
+                return false;
+            return true;
+        })
+            .map((d) => {
+            return (0, parse_1.MusicTrackFromSoundCloud)(d);
+        });
     }
     if (type === "albums" || type === "playlists") {
         return data.collection.map((d) => (0, parse_1.MusicPlaylistFromSoundCloud)(d));

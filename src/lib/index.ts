@@ -8,6 +8,9 @@ import { debugLog, getTimeFromSeconds } from "./util";
 import prism from "prism-media";
 import axios from "axios";
 import { getKey } from "./config";
+import { YouTube_Search } from "../services/YouTube";
+import { SoundCloud_Search } from "../services/SoundCloud";
+import { fetchGeniusSongLyrics, searchGeniusSong } from "./genius";
 
 export interface SearchOptions {
 	/** Service to search track on */
@@ -77,6 +80,31 @@ export interface Author {
 }
 
 /**
+ * Represents a song on Genius.
+ * Contains data such as lyrics and title.
+ */
+export interface GeniusSong {
+	/** Array containing lyrics */
+	lyrics?: string[];
+	/** Friendly URL of song on Genius */
+	url: string;
+	/** Genius Pyongs count */
+	pyongs?: number;
+	/** Full title of song on Genius (name and artist concatenated by "by") */
+	title: string;
+	/** Name of song on Genius */
+	name: string;
+	/** Primary artist of song on Genius */
+	artist: Author;
+	/** URL of song art thumbnail */
+	thumbnail: string;
+	/** ID of song on Genius */
+	id: number;
+	/** State of the lyrics of the song on Genius ("complete" if the lyrics are all there) */
+	lyricsState: string;
+}
+
+/**
  * MusicTrack Data Constructor
  *
  * Interface for `data` parameter used when creating a new {@link MusicTrack}
@@ -102,6 +130,8 @@ export interface MusicTrackConstructor {
 	explicit?: any;
 	/** Is the track in a playlist? Set true wehn adding to `MusicPlaylist.tracks` */
 	playlisted?: boolean;
+	/** Is the track unstreamable (e.g. a Spotify track) and was the audio replaced by an alternative source's audio? */
+	resolvedTo?: Service;
 	/** Service which is hosting the track */
 	service: Service;
 	/** Audio data */
@@ -123,6 +153,8 @@ export class MusicTrack {
 		explicit?: boolean;
 		/** ID of the track on the platform (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ --> `dQw4w9WgXcQ`) */
 		id?: string;
+		/** If the track wasn't streamable (e.g. Spotify), was the tracks audio replaced by an alternative source's track, and which service. */
+		resolvedTo: Service | false;
 	};
 	/** Duration of the track **in seconds** */
 	duration: number;
@@ -173,6 +205,7 @@ export class MusicTrack {
 			queuedBy: data.queuedBy || null,
 			explicit: data.explicit || false,
 			id: data.id,
+			resolvedTo: data.resolvedTo || false,
 		};
 		this.originalData = data.originalData;
 	}
@@ -208,28 +241,29 @@ export class MusicTrack {
 					throw err;
 				}));
 		if (!url) throw `Cannot get streaming URL for ${this.name}`;
+		// TODO: possibly make a way better args system
 		const args: any[] = [
 			"-ss",
 			seek,
 			"-i",
 			url,
-			// Do we analyze the duration????
 			// "-analyzeduration",
 			// "0",
 			// "-loglevel",
 			// "48",
-			// XXX: is the format really opus???
 			"-f",
 			"opus",
 			// Audio rate/resolution
 			// "-ar",
-			// "48000",
+			// "64000",
 			// Audio channels
 			"-ac",
 			"2",
 		];
 		if (audio?.bitrate) args.push("-b:a", audio.bitrate);
 		if (extraArgs) args.push(...extraArgs);
+		if (!extraArgs?.includes("-ar")) args.push("-ar", "48000");
+		debugLog(`MusicTrack FFmpeg args:`, args);
 
 		new prism.FFmpeg().on("error", (err) => {
 			debugLog(`FFmpeg streaming error for ${this.name}: ${err}`);
@@ -252,36 +286,16 @@ export class MusicTrack {
 			throw new Error("MusicTrack does not contain any audio streams");
 
 		if (this.service === Service.spotify) {
-			throw new Error(
-				"Spotify does not provide streaming, thus cannot return audio." +
-					" Try searching for a similar track on a different service."
-			);
-		}
+			debugLog(`Searching for Spotify track on alternative sources`);
+			this.audio = [];
 
-		if (this.service === Service.soundcloud) {
-			// debugLog(this.audio);
-			debugLog(this.audio);
+			let resolvedTrack = await this.resolveUnstreamableTrack();
+			if (!resolvedTrack) throw "Cannot find Spotify track on alternative sources";
+
+			this.audio = resolvedTrack.audio;
+			this.metadata.resolvedTo = resolvedTrack.service;
 			let best = this.audio
-				.filter((a: Audio) => (a.mimeType ? a.mimeType.includes("audio/mpeg") : false))
-				.filter((a: Audio) => a.protocol?.includes("progressive"))
-				.filter((a: Audio) =>
-					a.quality
-						? a.quality.includes("sq") || a.quality.includes("medium") || a.quality.includes("low")
-						: false
-				)?.[0];
-			// debugLog()
-			debugLog(best);
-
-			let { data } = await axios.get(`${best.url}`).catch((err: Error) => {
-				throw err;
-			});
-			best.url = data.url;
-			return best;
-		}
-
-		if (this.service === Service.youtube) {
-			await this.fetchMissingAudio();
-			let best = this.audio
+				.filter((a: Audio) => a.url != undefined)
 				.filter(
 					(a: Audio) =>
 						a.mimeType.includes("audio/mp3") ||
@@ -295,7 +309,65 @@ export class MusicTrack {
 				.sort((a: Audio, b: Audio) => {
 					let qualityToInt = (quality: string) => {
 						if (quality?.includes("HIGH")) return 3;
-						if (quality?.includes("MED")) return 2;
+						if (quality?.includes("MEDIUM")) return 2;
+						if (quality?.includes("LOW")) return 1;
+						return 1;
+					};
+
+					if (a.quality != undefined && b.quality != undefined)
+						return qualityToInt(b.quality) - qualityToInt(a.quality);
+					return 0;
+				});
+
+			return best?.[0];
+		}
+
+		if (this.service === Service.soundcloud) {
+			// debugLog(this.audio);
+			debugLog(this.audio);
+			let best = this.audio
+				.filter((a: Audio) => a.url != undefined)
+				.filter((a: Audio) => a.mimeType.includes("audio/mpeg") || a.mimeType.includes("audio/ogg"))
+				.filter((a: Audio) => a.protocol?.includes("progressive"))
+				.sort((a: Audio, b: Audio) => {
+					let qualityToInt = (quality: string) => {
+						if (quality?.includes("sq")) return 3;
+						if (quality?.includes("medium")) return 2;
+						if (quality?.includes("low")) return 1;
+						return 1;
+					};
+
+					if (a.quality != undefined && b.quality != undefined)
+						return qualityToInt(b.quality) - qualityToInt(a.quality);
+					return 0;
+				})?.[0];
+			debugLog(best);
+
+			let { data } = await axios.get(`${best.url}`).catch((err: Error) => {
+				throw err;
+			});
+			best.url = data.url;
+			return best;
+		}
+
+		if (this.service === Service.youtube) {
+			await this.fetchMissingAudio();
+			let best = this.audio
+				.filter((a: Audio) => a.url != undefined)
+				.filter(
+					(a: Audio) =>
+						a.mimeType.includes("audio/mp3") ||
+						a.mimeType.includes("audio/mpeg") ||
+						a.mimeType.includes("audio/mp4")
+				)
+				.sort((a: Audio, b: Audio) => {
+					if (a.bitrate && b.bitrate) return b.bitrate - a.bitrate;
+					return 0;
+				})
+				.sort((a: Audio, b: Audio) => {
+					let qualityToInt = (quality: string) => {
+						if (quality?.includes("HIGH")) return 3;
+						if (quality?.includes("MEDIUM")) return 2;
 						if (quality?.includes("LOW")) return 1;
 						return 1;
 					};
@@ -320,27 +392,60 @@ export class MusicTrack {
 	 * Adds neccessary audio data to MusicTrack in the case it was not added.
 	 */
 	async fetchMissingAudio() {
-		if (this.service !== Service.youtube) return;
 		if (this.audio && this.audio.length > 0) return;
 
-		let { data } = await axios.get(
-			`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${
-				this.metadata.id || this.originalData.videoId
-			}?fields=adaptiveFormats`
-		);
-		if (!data) return;
-		debugLog(`FetchMissingAudio data:`, data);
+		if (this.service === Service.youtube) {
+			let { data } = await axios.get(
+				`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${
+					this.metadata.id || this.originalData.videoId
+				}?fields=adaptiveFormats`
+			);
+			if (!data) return;
+			debugLog(`FetchMissingAudio data:`, data);
 
-		this.audio = data.adaptiveFormats
-			.filter((f: any) => f.audioQuality != null)
-			.map((f: any) => {
-				return {
-					url: f.url,
-					quality: f.audioQuality,
-					mimeType: f.type,
-					bitrate: f.bitrate,
-				};
-			});
+			this.audio = data.adaptiveFormats
+				.filter((f: any) => f.audioQuality != null)
+				.map((f: any) => {
+					return {
+						url: f.url,
+						quality: f.audioQuality,
+						mimeType: f.type,
+						bitrate: f.bitrate,
+					};
+				});
+		}
+
+		return;
+	}
+
+	/**
+	 * If the track is not streamable (e.g. Spotify), attempt to find a track on an alternative source and use the audio from there
+	 */
+	async resolveUnstreamableTrack() {
+		if (this.service === Service.spotify) {
+			// TODO: maybe use fuse.js to get a more accurate search
+			let yt = (await YouTube_Search(`${this.name} ${this.authors.join(" ")}`, 1, "video"))?.[0];
+			if (yt instanceof MusicTrack) return yt;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Searches for the track on Genius and returns a {@link GeniusSong}. Contains data such as lyrics.
+	 */
+	async getGeniusSong(): Promise<GeniusSong | null> {
+		let title = this.name.toLowerCase().replace(/(\(|)lyrics(\)|)/g, "");
+		let song =
+			(await searchGeniusSong(`${title} ${this.authors[0].name}`)) ||
+			(await searchGeniusSong(`${title}`));
+		if (!song) return null;
+		// let lyrics = await fetchGeniusSongLyrics(song.url).catch((err) => {
+		// 	throw err;
+		// });
+		song.lyrics = ["Lyrics not implemented atm"] || [];
+
+		return song;
 	}
 
 	/**

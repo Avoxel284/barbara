@@ -13,7 +13,7 @@ Library is in development, use at your own risk.
 
 Unified MusicTrack and MusicPlaylist objects for use in Discord bots for playing music. Uses Prism Media to create **FFmpeg** streams.
 
-Currently only supports SoundCloud.
+Utilizes the [Invidious](https://invidious.io/) API for streaming YouTube videos.
 
 ## Installation
 
@@ -31,6 +31,11 @@ const barbara = require("barbara-music");
 
 // Get a free SoundCloud client ID and set it
 barbara.setKey("SOUNDCLOUD_CLIENTID", await barbara.freeKey("SOUNDCLOUD_CLIENTID"));
+
+// Get the best Invidious API URL and set it
+barbara.freeKey("YOUTUBE_INVIDIOUSSITE").then((key) => {
+	barbara.setKey("YOUTUBE_INVIDIOUSSITE", key);
+});
 ```
 
 Refer to the cheatsheet for auth key identifiers.
@@ -38,7 +43,7 @@ Refer to the cheatsheet for auth key identifiers.
 ```js
 const barbara = require("barbara-music");
 
-barbara.search("never gonna give you up", { service: "youtube" }).then(async (tracks) => {
+barbara.search("never gonna give you up", { service: "youtube", limit: 5 }).then(async (tracks) => {
 	const track = tracks[0];
 	const resource = discordVoice.createAudioResource(await track.resource());
 });

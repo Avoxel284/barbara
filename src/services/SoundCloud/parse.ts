@@ -5,6 +5,7 @@
 
 import { MusicPlaylist, MusicTrack, Service } from "../../lib";
 import { getKey } from "../../lib/config";
+import { debugLog } from "../../lib/util";
 
 export function MusicTrackFromSoundCloud(data: any) {
 	const clientId = getKey("SOUNDCLOUD_CLIENTID");
@@ -29,12 +30,13 @@ export function MusicTrackFromSoundCloud(data: any) {
 			: undefined,
 		service: Service.soundcloud,
 		audio: data.media.transcodings.map((a: any) => {
+			// debugLog(`Parsing SoundCloud formats:`, a, a.format);
 			return {
 				url: a.url + `?client_id=${clientId}`,
 				quality: a.quality,
 				duration: a.duration,
 				protocol: a.format?.protocol,
-				mimeType: a.format?.mime_type,
+				mimeType: a.format?.mime_type?.split(";")[0],
 			};
 		}),
 		originalData: data,

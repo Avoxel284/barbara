@@ -7,6 +7,7 @@ exports.Spotify_Validate = exports.Spotify_Search = exports.Spotify_Info = expor
 const axios_1 = __importDefault(require("axios"));
 const parse_1 = require("./parse");
 const config_1 = require("../../lib/config");
+const util_1 = require("../../lib/util");
 exports.SPOTIFY_URL_PATTERN = /^((https:)?\/\/)?open.spotify.com\/(track|album|playlist)\//;
 async function Spotify_Info(url) {
     url = url.trim();
@@ -68,14 +69,15 @@ async function Spotify_Search(query, limit = 5, type = "track") {
         .catch((err) => {
         throw err;
     });
+    (0, util_1.debugLog)(`Spotify search data:`, data);
     if (type === "track") {
         return data.tracks.items.map((d) => (0, parse_1.MusicTrackFromSpotify)(d));
     }
     if (type === "playlist") {
-        return data.tracks.items.map((d) => (0, parse_1.MusicPlaylistFromSpotify)(d));
+        return data.playlist.items.map((d) => (0, parse_1.MusicPlaylistFromSpotify)(d));
     }
     if (type === "album") {
-        return data.tracks.items.map((d) => (0, parse_1.MusicPlaylistFromSpotify)(d, true));
+        return data.albums.items.map((d) => (0, parse_1.MusicPlaylistFromSpotify)(d, true));
     }
     throw new Error("Spotify returned unknown resource.");
 }

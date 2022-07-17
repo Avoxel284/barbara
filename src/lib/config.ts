@@ -28,6 +28,10 @@ const keys: any = {
 		COOKIE: "",
 		INVIDIOUSSITE: "https://vid.puffyan.us",
 	},
+	GENIUS: {
+		TOKEN: "",
+		LYRICSCACHING: true,
+	},
 	CONFIG: {
 		DEBUG: false,
 		FILE: "",
@@ -89,6 +93,50 @@ export function setKey(key: string, value: string): void {
 }
 
 /**
+ * Set authentication keys in bulk.
+ * A full reference of key names can be found on the cheatsheet.
+ *
+ * **Use this function to set keys before invoking other Barbara-related stuff so Barbara can use the given keys.**
+ *
+ * @example
+ * ```
+ * setKeys({
+ * 	// Supports underscore format...
+ * 	"SOUNDCLOUD_CLIENTID": "1234567890",
+ * 	// ... or hierarchical format
+ * 	"SPOTIFY": {
+ * 		CLIENTID: "1234567890"
+ * 	}
+ * })
+ * ```
+ *
+ * @param ks Object containing keys
+ */
+export function setKeys(ks: object): void {
+	for (let [a, b] of Object.entries(ks)) {
+		a = a.toUpperCase();
+		// underscore format
+		if (a.includes("_") && typeof b !== "object") {
+			let k = a.split("_");
+			// Skip if doesn't exist
+			k[0] = k[0].toUpperCase();
+			k[1] = k[1].toUpperCase();
+			if (keys[k[0]]?.[k[1]] === undefined) continue;
+			keys[k[0]][k[1]] = b;
+			continue;
+		}
+		// object format
+		if (keys[a] === undefined) continue;
+		for (let [c, v] of Object.entries(b)) {
+			c = c.toUpperCase();
+			// Skip if doesn't exist
+			if (keys[a]?.[c] === undefined) continue;
+			keys[a][c] = v;
+		}
+	}
+}
+
+/**
  * Read a configuration file and append to authenticaton keys.
  *
  * @param path Path to configuration file
@@ -109,7 +157,7 @@ export function setKeyFile(path: string, overwrite: boolean = true): void {
 			for (let [c, v] of Object.entries(b)) {
 				c = c.toUpperCase();
 				// Skip if doesn't exist
-				if (keys[a][c] === undefined) continue;
+				if (keys[a]?.[c] === undefined) continue;
 				// Check if already set
 				if (keys[a][c] && overwrite == false) continue;
 				keys[a][c] = v;

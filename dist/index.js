@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setKeyFile = exports.getKey = exports.freeKey = exports.setKey = exports.Service = exports.MusicPlaylist = exports.MusicTrack = exports.info = exports.serviceFromURL = exports.search = void 0;
+exports.fetchGeniusSongLyrics = exports.searchGeniusSong = exports.setKeys = exports.setKeyFile = exports.getKey = exports.freeKey = exports.setKey = exports.Service = exports.MusicPlaylist = exports.MusicTrack = exports.info = exports.serviceFromURL = exports.search = void 0;
 const lib_1 = require("./lib");
 Object.defineProperty(exports, "MusicTrack", { enumerable: true, get: function () { return lib_1.MusicTrack; } });
 Object.defineProperty(exports, "MusicPlaylist", { enumerable: true, get: function () { return lib_1.MusicPlaylist; } });
@@ -13,8 +13,12 @@ Object.defineProperty(exports, "setKey", { enumerable: true, get: function () { 
 Object.defineProperty(exports, "freeKey", { enumerable: true, get: function () { return config_1.freeKey; } });
 Object.defineProperty(exports, "getKey", { enumerable: true, get: function () { return config_1.getKey; } });
 Object.defineProperty(exports, "setKeyFile", { enumerable: true, get: function () { return config_1.setKeyFile; } });
+Object.defineProperty(exports, "setKeys", { enumerable: true, get: function () { return config_1.setKeys; } });
 const Arbitrary_1 = require("./services/Arbitrary");
 const util_1 = require("./lib/util");
+const genius_1 = require("./lib/genius");
+Object.defineProperty(exports, "searchGeniusSong", { enumerable: true, get: function () { return genius_1.searchGeniusSong; } });
+Object.defineProperty(exports, "fetchGeniusSongLyrics", { enumerable: true, get: function () { return genius_1.fetchGeniusSongLyrics; } });
 async function search(query, options = {}) {
     let type;
     options.limit ??= 1;

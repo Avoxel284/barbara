@@ -7,6 +7,7 @@ import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../lib";
 import axios from "axios";
 import { MusicTrackFromSpotify, MusicPlaylistFromSpotify } from "./parse";
 import { getKey, setKey } from "../../lib/config";
+import { debugLog } from "../../lib/util";
 
 /** URL pattern for Spotify - ripped from play-dl */
 export const SPOTIFY_URL_PATTERN = /^((https:)?\/\/)?open.spotify.com\/(track|album|playlist)\//;
@@ -95,16 +96,18 @@ export async function Spotify_Search(
 			throw err;
 		});
 
+	debugLog(`Spotify search data:`, data);
+
 	if (type === "track") {
 		return data.tracks.items.map((d: any) => MusicTrackFromSpotify(d));
 	}
 
 	if (type === "playlist") {
-		return data.tracks.items.map((d: any) => MusicPlaylistFromSpotify(d));
+		return data.playlist.items.map((d: any) => MusicPlaylistFromSpotify(d));
 	}
 
 	if (type === "album") {
-		return data.tracks.items.map((d: any) => MusicPlaylistFromSpotify(d, true));
+		return data.albums.items.map((d: any) => MusicPlaylistFromSpotify(d, true));
 	}
 
 	throw new Error("Spotify returned unknown resource.");

@@ -26,6 +26,7 @@ export async function SoundCloud_Info(url: string): Promise<MusicTrack | MusicPl
 		.catch((err: Error) => {
 			throw err;
 		});
+	if (data.streamable === false) throw "SoundCloud track cannot be streamed";
 
 	if (data.kind === "track") {
 		return MusicTrackFromSoundCloud(data);
@@ -40,6 +41,10 @@ export async function SoundCloud_Info(url: string): Promise<MusicTrack | MusicPl
 
 /**
  * Searches for a SoundCloud track or playlist and returns with an array of {@link MusicTrack} or {@link MusicPlaylist}
+ *
+ * **Note:** Limit minimum is 5 since SoundCloud includes premium-only (Go+) tracks in searches.
+ * Attempting to stream from such would result in a preview stream which would only last ~15 seconds.
+ * Increasing the limit increases the chances of finding a non-premium track.
  */
 export async function SoundCloud_Search(
 	query: string,
@@ -49,6 +54,7 @@ export async function SoundCloud_Search(
 	let clientId = await getKey("SOUNDCLOUD_CLIENTID");
 	if (!clientId) throw new Error("SoundCloud Client ID is not set!");
 	if (!query) throw new Error("No query given!");
+	if (limit < 5) limit = 5;
 
 	const { data } = await axios
 		.get(
@@ -61,7 +67,14 @@ export async function SoundCloud_Search(
 		});
 
 	if (type === "tracks") {
-		return data.collection.map((d: any) => MusicTrackFromSoundCloud(d));
+		return data.collection
+			.filter((d: any) => {
+				if (d?.monetization_model && d?.monetization_model.includes("SUB")) return false;
+				return true;
+			})
+			.map((d: any) => {
+				return MusicTrackFromSoundCloud(d);
+			});
 	}
 
 	if (type === "albums" || type === "playlists") {

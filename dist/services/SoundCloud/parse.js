@@ -30,7 +30,7 @@ function MusicTrackFromSoundCloud(data) {
                 quality: a.quality,
                 duration: a.duration,
                 protocol: a.format?.protocol,
-                mimeType: a.format?.mime_type,
+                mimeType: a.format?.mime_type?.split(";")[0],
             };
         }),
         originalData: data,
