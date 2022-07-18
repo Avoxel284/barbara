@@ -19,7 +19,7 @@ import { SoundCloud_Info, SoundCloud_Search, SoundCloud_Validate } from "./servi
 import { YouTube_Info, YouTube_Search, YouTube_Validate } from "./services/YouTube";
 import { Spotify_Info, Spotify_Search, Spotify_Validate } from "./services/Spotify";
 import { setKey, freeKey, getKey, setKeyFile, setKeys } from "./lib/config";
-import { AudioFile_Info, AudioFile_Validate, AUDIOFILE_URL_PATTERN } from "./services/Arbitrary";
+import { AudioFile_Info, AudioFile_Validate } from "./services/Arbitrary";
 import { debugLog } from "./lib/util";
 import { searchGeniusSong, fetchGeniusSongLyrics } from "./lib/genius";
 import { refreshTokens } from "./lib/auth";

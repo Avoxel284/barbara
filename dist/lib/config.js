@@ -7,6 +7,7 @@ exports.freeKey = exports.setKeyFile = exports.setKeys = exports.setKey = export
 const axios_1 = __importDefault(require("axios"));
 const fs_1 = __importDefault(require("fs"));
 const auth_1 = require("./auth");
+const util_1 = require("./util");
 const keys = {
     SOUNDCLOUD: {
         CLIENTID: "",
@@ -35,14 +36,16 @@ const keys = {
 };
 function getKey(key) {
     const k = key.split("_");
-    if (keys?.[k[0]]?.[k[1]] == null)
+    if (keys?.[k[0]]?.[k[1]] === undefined)
         throw new Error("Cannot find key to get: " + key);
     return keys[k[0]][k[1]];
 }
 exports.getKey = getKey;
 function setKey(key, value) {
     const k = key.split("_");
-    if (keys?.[k[0]]?.[k[1]] == null)
+    if (value === undefined)
+        (0, util_1.warnLog)(`Value when setting ${k[0]}_${k[1]} is undefined!`);
+    if (keys?.[k[0]]?.[k[1]] === undefined)
         throw new Error("Cannot find key to set: " + key);
     keys[k[0]][k[1]] = value;
     (0, auth_1.authenticateKey)(k[0]);
@@ -57,7 +60,10 @@ function setKeys(ks) {
             k[1] = k[1].toUpperCase();
             if (keys[k[0]]?.[k[1]] === undefined)
                 continue;
+            if (b === undefined)
+                (0, util_1.warnLog)(`Value when setting ${k[0]}_${k[1]} is undefined!`);
             keys[k[0]][k[1]] = b;
+            (0, auth_1.authenticateKey)(k[0]);
             continue;
         }
         if (keys[a] === undefined)
@@ -66,7 +72,11 @@ function setKeys(ks) {
             c = c.toUpperCase();
             if (keys[a]?.[c] === undefined)
                 continue;
+            if (v === undefined)
+                (0, util_1.warnLog)(`Value when setting ${a}_${c} is undefined!`);
             keys[a][c] = v;
+            (0, auth_1.authenticateKey)(a);
+            continue;
         }
     }
 }
@@ -90,6 +100,7 @@ function setKeyFile(path, overwrite = true) {
                 if (keys[a][c] && overwrite == false)
                     continue;
                 keys[a][c] = v;
+                (0, auth_1.authenticateKey)(a);
             }
         }
     }

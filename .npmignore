@@ -3,3 +3,4 @@ examples/
 media/
 src/
 DOCS_README.md
+*/.env

@@ -15,10 +15,8 @@ Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, and `freeKey(<Key ID>)`
 
 <u>To be implemented</u>
 
-- **API key** - `SPOTIFY_APIKEY`
 - **\*Client ID** - `SPOTIFY_CLIENTID`
-- **Client secret** - `SPOTIFY_CLIENTSECRET`
-- **Authorization code** - `SPOTIFY_AUTHCODE`
+- **\*Client secret** - `SPOTIFY_CLIENTSECRET` <br> Set client secret and ID and Barbara will automatically fill in the below (except market code)
 - **Access token** - `SPOTIFY_ACCESSTOKEN`
 - **Refresh token** - `SPOTIFY_REFRESHTOKEN`
 - **Token type** - `SPOTIFY_TOKENTYPE`

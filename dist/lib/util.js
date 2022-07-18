@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSecondsFromTime = exports.getTimeFromSeconds = exports.debugLog = exports.getRandomInt = void 0;
+exports.getSecondsFromTime = exports.getTimeFromSeconds = exports.warnLog = exports.debugLog = exports.getRandomInt = void 0;
 const config_1 = require("./config");
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -17,6 +17,13 @@ function debugLog(...content) {
     }
 }
 exports.debugLog = debugLog;
+function warnLog(...content) {
+    console.log(`\u001b[33m[ Barbara Warning ]\u001b[0m`, arguments[0]);
+    for (let i = 1; arguments.length > i; i++) {
+        console.log(arguments[i]);
+    }
+}
+exports.warnLog = warnLog;
 function getTimeFromSeconds(time) {
     let hrs = ~~(time / 3600);
     let mins = ~~((time % 3600) / 60);

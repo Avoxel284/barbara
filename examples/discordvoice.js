@@ -19,7 +19,7 @@ client.on("ready", async (client) => {
 
 	// Set our keys
 	Barbara.setKey("CONFIG_DEBUG", true);
-	Barbara.setKey("SOUNDCLOUD_CLIENTID", await Barbara.freeKeys("SOUNDCLOUD_CLIENTID"));
+	Barbara.setKey("SOUNDCLOUD_CLIENTID", await Barbara.freeKey("SOUNDCLOUD_CLIENTID"));
 	console.log(Barbara.getKey("SOUNDCLOUD_CLIENTID"));
 });
 

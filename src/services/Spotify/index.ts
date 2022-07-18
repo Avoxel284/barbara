@@ -49,7 +49,7 @@ export async function Spotify_Info(url: string): Promise<MusicTrack | MusicPlayl
 				throw err;
 			});
 
-		return MusicPlaylistFromSpotify(data);
+		return await MusicPlaylistFromSpotify(data);
 	}
 
 	if (url.includes("album/")) {
@@ -64,7 +64,7 @@ export async function Spotify_Info(url: string): Promise<MusicTrack | MusicPlayl
 				throw err;
 			});
 
-		return MusicPlaylistFromSpotify(data, true);
+		return await MusicPlaylistFromSpotify(data, true);
 	}
 
 	throw new Error("Spotify returned unknown resource.");

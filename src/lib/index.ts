@@ -231,7 +231,8 @@ export class MusicTrack {
 	 * @param audio Custom audio object to use instead of relying on {@link MusicTrack.bestAudio()}
 	 */
 	async resource(seek: number = 0, extraArgs?: any[], audio?: Audio) {
-		if (this.duration === 0) throw `Track duration is 0 for track: ${this.name}`;
+		if (this.duration === 0 && this.live === false)
+			throw `Track duration is 0 for track: ${this.name}`;
 		if (seek < 0 || seek > this.duration) throw `Seek is out of range for track: ${this.name}`;
 		const url =
 			audio?.url ||
@@ -260,7 +261,7 @@ export class MusicTrack {
 			"-ac",
 			"2",
 		];
-		if (audio?.bitrate) args.push("-b:a", audio.bitrate);
+		if (audio?.bitrate && audio.bitrate < 510000) args.push("-b:a", Math.round(audio.bitrate));
 		if (extraArgs) args.push(...extraArgs);
 		if (!extraArgs?.includes("-ar")) args.push("-ar", "48000");
 		debugLog(`MusicTrack FFmpeg args:`, args);
@@ -278,51 +279,22 @@ export class MusicTrack {
 
 	/**
 	 * Returns the best audio format.
+	 *
 	 * **Note:** if SoundCloud is the service, `Audio.url` is changed to a time sensitive URL due to SoundCloud APIs.
+	 *
+	 * **Note:** if Spotify is the service, the track will attempt to find an alternative track on YouTube.
 	 */
 	async bestAudio(): Promise<Audio> {
 		await this.fetchMissingAudio();
+		let service = this.metadata.resolvedTo || this.service;
 		if (this.audio == undefined || this.audio?.length == 0)
 			throw new Error("MusicTrack does not contain any audio streams");
 
-		if (this.service === Service.spotify) {
-			debugLog(`Searching for Spotify track on alternative sources`);
-			this.audio = [];
-
-			let resolvedTrack = await this.resolveUnstreamableTrack();
-			if (!resolvedTrack) throw "Could not find Spotify track on alternative sources";
-
-			this.audio = resolvedTrack.audio;
-			this.metadata.resolvedTo = resolvedTrack.service;
-			let best = this.audio
-				.filter((a: Audio) => a.url != undefined)
-				.filter(
-					(a: Audio) =>
-						a.mimeType.includes("audio/mp3") ||
-						a.mimeType.includes("audio/mpeg") ||
-						a.mimeType.includes("audio/mp4")
-				)
-				.sort((a: Audio, b: Audio) => {
-					if (a.bitrate && b.bitrate) return b.bitrate - a.bitrate;
-					return 0;
-				})
-				.sort((a: Audio, b: Audio) => {
-					let qualityToInt = (quality: string) => {
-						if (quality?.includes("HIGH")) return 3;
-						if (quality?.includes("MEDIUM")) return 2;
-						if (quality?.includes("LOW")) return 1;
-						return 1;
-					};
-
-					if (a.quality != undefined && b.quality != undefined)
-						return qualityToInt(b.quality) - qualityToInt(a.quality);
-					return 0;
-				});
-
-			return best?.[0];
+		if (service === Service.spotify) {
+			throw "Streaming on Spotify is not supported. Try using resolveUnstreamableTrack() first!";
 		}
 
-		if (this.service === Service.soundcloud) {
+		if (service === Service.soundcloud) {
 			// debugLog(this.audio);
 			debugLog(this.audio);
 			let best = this.audio
@@ -350,7 +322,7 @@ export class MusicTrack {
 			return best;
 		}
 
-		if (this.service === Service.youtube) {
+		if (service === Service.youtube) {
 			await this.fetchMissingAudio();
 			let best = this.audio
 				.filter((a: Audio) => a.url != undefined)
@@ -381,7 +353,7 @@ export class MusicTrack {
 			return best?.[0];
 		}
 
-		if (this.service === Service.audiofile) {
+		if (service === Service.audiofile) {
 			return this.audio[0];
 		}
 
@@ -419,22 +391,37 @@ export class MusicTrack {
 	}
 
 	/**
-	 * If the track is not streamable (e.g. Spotify), attempt to find a track on an alternative source and use the audio from there
+	 * If the track is not streamable (e.g. Spotify), attempts to find a track on an alternative source and overwrites the current audio with the new audio.
+	 * The tracks `metadata.resolvedTo` property value will also be replaced with the resolved service.
+	 *
+	 * @example
+	 * ```
+	 * if (track.service === "spotify"){
+	 * 	let { query } = await track.resolveUnstreamableTrack();
+	 * 	console.log(query);
+	 * 	console.log(await track.bestAudio());
+	 * }
+	 * ```
+	 * @returns Object containing the search query made (`query`) and found track (`result`) or undefined if couldn't find an alternative track
 	 */
 	async resolveUnstreamableTrack() {
 		if (this.service === Service.spotify) {
 			// TODO: maybe use fuse.js to get a more accurate search
-			let yt = (
-				await YouTube_Search(
-					`${this.name} ${this.authors.map((v) => v.name).join(" ")}`,
-					1,
-					"video"
-				)
-			)?.[0];
-			if (yt instanceof MusicTrack) return yt;
+			let query = `${this.name} ${this.authors.map((v) => v.name).join(" ")}`;
+			let yt = (await YouTube_Search(query, 10, "video"))?.[0];
+			if (!yt) return;
+			if (!(yt instanceof MusicTrack)) return;
+
+			await yt.fetchMissingAudio();
+			this.metadata.resolvedTo = Service.youtube;
+			this.audio = yt.audio;
+			return {
+				query: query,
+				result: yt,
+			};
 		}
 
-		return null;
+		return;
 	}
 
 	/**
@@ -551,10 +538,14 @@ export class MusicPlaylist {
 	}
 
 	/**
-	 * Set who queued the playlist, for example the user's Discord ID
+	 * Set who queued the playlist, for example the user's Discord ID.
+	 * This will also set who queued all the tracks.
 	 */
 	setQueuedBy(queuedBy: any) {
 		this.metadata.queuedBy = queuedBy;
+		this.tracks.forEach((t) => {
+			t.setQueuedBy(queuedBy);
+		});
 		return this;
 	}
 }

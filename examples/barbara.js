@@ -1,9 +1,12 @@
 const barbara = require("../dist");
+require("dotenv").config();
 
 // console.log(barbara.search("hi", { service: barbara.Service.spotify }));
 
 barbara.setKey("CONFIG_DEBUG", true);
-barbara.setKey("GENIUS_TOKEN", "MilVK-zUawQ4t2K-zSrhck04-kFElh4wus5WthsA9-MYEl0TQ3XPy-W0ltxY4LSJ");
+barbara.setKey("GENIUS_TOKEN", "");
+barbara.setKey("SPOTIFY_CLIENTID", process.env.SPOTIFY_CLIENTID);
+barbara.setKey("SPOTIFY_CLIENTSECRET", process.env.SPOTIFY_SECRET);
 
 (async () => {
 	// barbara.setKey("SOUNDCLOUD_CLIENTID", await barbara.freeKey("SOUNDCLOUD_CLIENTID"));
@@ -23,4 +26,10 @@ barbara.setKey("GENIUS_TOKEN", "MilVK-zUawQ4t2K-zSrhck04-kFElh4wus5WthsA9-MYEl0T
 	// }).catch(console.error);
 
 	// console.log(await barbara.fetchGeniusSongLyrics("https://genius.com/Ducky-leave-lyrics"));
+
+	setTimeout(async () => {
+		await barbara.info(
+			"https://open.spotify.com/playlist/3LpW72MY6ELoySVSEEWptR?si=23d9b1fb8a0a402e"
+		);
+	}, 4000);
 })();

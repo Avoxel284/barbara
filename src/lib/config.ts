@@ -8,7 +8,7 @@
 import axios from "axios";
 import fs from "fs";
 import { authenticateKey } from "./auth";
-import { debugLog } from "./util";
+import { debugLog, warnLog } from "./util";
 
 const keys: any = {
 	SOUNDCLOUD: {
@@ -66,7 +66,7 @@ const keys: any = {
  */
 export function getKey(key: string): boolean | string {
 	const k: string[] = key.split("_");
-	if (keys?.[k[0]]?.[k[1]] == null) throw new Error("Cannot find key to get: " + key);
+	if (keys?.[k[0]]?.[k[1]] === undefined) throw new Error("Cannot find key to get: " + key);
 	return keys[k[0]][k[1]];
 }
 
@@ -87,13 +87,14 @@ export function getKey(key: string): boolean | string {
  */
 export function setKey(key: string, value: string): void {
 	const k: string[] = key.split("_");
-	if (keys?.[k[0]]?.[k[1]] == null) throw new Error("Cannot find key to set: " + key);
+	if (value === undefined) warnLog(`Value when setting ${k[0]}_${k[1]} is undefined!`);
+	if (keys?.[k[0]]?.[k[1]] === undefined) throw new Error("Cannot find key to set: " + key);
 	keys[k[0]][k[1]] = value;
 	authenticateKey(k[0]);
 }
 
 /**
- * Set authentication keys in bulk.
+ * Set authentication keys in bulk. Note: will overwrite specified keys.
  * A full reference of key names can be found on the cheatsheet.
  *
  * **Use this function to set keys before invoking other Barbara-related stuff so Barbara can use the given keys.**
@@ -122,7 +123,9 @@ export function setKeys(ks: object): void {
 			k[0] = k[0].toUpperCase();
 			k[1] = k[1].toUpperCase();
 			if (keys[k[0]]?.[k[1]] === undefined) continue;
+			if (b === undefined) warnLog(`Value when setting ${k[0]}_${k[1]} is undefined!`);
 			keys[k[0]][k[1]] = b;
+			authenticateKey(k[0]);
 			continue;
 		}
 		// object format
@@ -131,7 +134,10 @@ export function setKeys(ks: object): void {
 			c = c.toUpperCase();
 			// Skip if doesn't exist
 			if (keys[a]?.[c] === undefined) continue;
+			if (v === undefined) warnLog(`Value when setting ${a}_${c} is undefined!`);
 			keys[a][c] = v;
+			authenticateKey(a);
+			continue;
 		}
 	}
 }
@@ -161,6 +167,7 @@ export function setKeyFile(path: string, overwrite: boolean = true): void {
 				// Check if already set
 				if (keys[a][c] && overwrite == false) continue;
 				keys[a][c] = v;
+				authenticateKey(a);
 			}
 		}
 	} catch (err) {

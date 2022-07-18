@@ -37,7 +37,7 @@ async function Spotify_Info(url) {
             .catch((err) => {
             throw err;
         });
-        return (0, parse_1.MusicPlaylistFromSpotify)(data);
+        return await (0, parse_1.MusicPlaylistFromSpotify)(data);
     }
     if (url.includes("album/")) {
         const albumID = url.split("album/")[1].split("&")[0].split("?")[0];
@@ -50,7 +50,7 @@ async function Spotify_Info(url) {
             .catch((err) => {
             throw err;
         });
-        return (0, parse_1.MusicPlaylistFromSpotify)(data, true);
+        return await (0, parse_1.MusicPlaylistFromSpotify)(data, true);
     }
     throw new Error("Spotify returned unknown resource.");
 }

@@ -3,6 +3,7 @@
  * Barbara Music Module / Spotify
  */
 
+import axios from "axios";
 import { MusicPlaylist, MusicTrack, Service } from "../../lib";
 import { getKey } from "../../lib/config";
 
@@ -19,14 +20,37 @@ export function MusicTrackFromSpotify(data: any) {
 				id: artist.id,
 			};
 		}),
-		thumbnail: data?.album?.images?.[0],
+		thumbnail: data?.album?.images?.[0]?.url,
 		service: Service.spotify,
 		explicit: data.explicit,
 		originalData: data,
 	});
 }
 
-export function MusicPlaylistFromSpotify(data: any, isAlbum: boolean = false) {
+export async function MusicPlaylistFromSpotify(data: any, isAlbum: boolean = false) {
+	const fetchTracks = async (nextPageUrl?: string) => {
+		if (nextPageUrl) {
+			let { data } = await axios.get(nextPageUrl, {
+				headers: {
+					Authorization: `${getKey("SPOTIFY_TOKENTYPE")} ${getKey("SPOTIFY_ACCESSTOKEN")}`,
+				},
+			});
+			if (data.tracks?.next) fetchTracks(data.tracks.next);
+
+			return data?.tracks.items.map((d: any) => {
+				MusicTrackFromSpotify(d);
+			});
+		} else {
+			if (data.tracks?.next) await fetchTracks(data.tracks.next);
+
+			return data?.tracks.items.map((d: any) => {
+				MusicTrackFromSpotify(d);
+			});
+		}
+	};
+
+	console.log(await fetchTracks())
+
 	return new MusicPlaylist({
 		name: data.name,
 		url: data.external_urls.spotify,
@@ -37,14 +61,13 @@ export function MusicPlaylistFromSpotify(data: any, isAlbum: boolean = false) {
 			name: data.owner.display_name,
 			id: data.owner.id,
 		},
-		thumbnail: data?.images?.[0],
+		thumbnail: data?.images?.[0]?.url,
 		service: Service.spotify,
 		isAlbum: isAlbum,
 		// TODO: possibly convert to map?
 		// TODO: tracks in playlist- check api
-		tracks: data?.tracks.map((d: any) => {
-			MusicTrackFromSpotify(d);
-		}),
+		// tracks: await fetchTracks(),
+		tracks: [],
 		originalData: data,
 	});
 }

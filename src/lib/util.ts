@@ -30,6 +30,18 @@ export function debugLog(...content: any) {
 }
 
 /**
+ * Log warning in console
+ *
+ * @param content Parameter that can accept variable amount of content that gets logged
+ */
+export function warnLog(...content: any) {
+	console.log(`\u001b[33m[ Barbara Warning ]\u001b[0m`, arguments[0]);
+	for (let i = 1; arguments.length > i; i++) {
+		console.log(arguments[i]);
+	}
+}
+
+/**
  * Returns a timestamp such as `3:10`, `45:32` or `132:44:19` from a given amount of seconds
  */
 export function getTimeFromSeconds(time: number) {

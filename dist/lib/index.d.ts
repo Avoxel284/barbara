@@ -76,7 +76,10 @@ export declare class MusicTrack {
     resource(seek?: number, extraArgs?: any[], audio?: Audio): Promise<prism.FFmpeg>;
     bestAudio(): Promise<Audio>;
     fetchMissingAudio(): Promise<void>;
-    resolveUnstreamableTrack(): Promise<MusicTrack | null>;
+    resolveUnstreamableTrack(): Promise<{
+        query: string;
+        result: MusicTrack;
+    } | undefined>;
     getGeniusSong(): Promise<GeniusSong | null>;
     setQueuedBy(queuedBy: any): this;
 }

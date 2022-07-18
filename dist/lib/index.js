@@ -40,7 +40,7 @@ class MusicTrack {
         this.originalData = data.originalData;
     }
     async resource(seek = 0, extraArgs, audio) {
-        if (this.duration === 0)
+        if (this.duration === 0 && this.live === false)
             throw `Track duration is 0 for track: ${this.name}`;
         if (seek < 0 || seek > this.duration)
             throw `Seek is out of range for track: ${this.name}`;
@@ -62,8 +62,8 @@ class MusicTrack {
             "-ac",
             "2",
         ];
-        if (audio?.bitrate)
-            args.push("-b:a", audio.bitrate);
+        if (audio?.bitrate && audio.bitrate < 510000)
+            args.push("-b:a", Math.round(audio.bitrate));
         if (extraArgs)
             args.push(...extraArgs);
         if (!extraArgs?.includes("-ar"))
@@ -79,43 +79,13 @@ class MusicTrack {
     }
     async bestAudio() {
         await this.fetchMissingAudio();
+        let service = this.metadata.resolvedTo || this.service;
         if (this.audio == undefined || this.audio?.length == 0)
             throw new Error("MusicTrack does not contain any audio streams");
-        if (this.service === Service.spotify) {
-            (0, util_1.debugLog)(`Searching for Spotify track on alternative sources`);
-            this.audio = [];
-            let resolvedTrack = await this.resolveUnstreamableTrack();
-            if (!resolvedTrack)
-                throw "Could not find Spotify track on alternative sources";
-            this.audio = resolvedTrack.audio;
-            this.metadata.resolvedTo = resolvedTrack.service;
-            let best = this.audio
-                .filter((a) => a.url != undefined)
-                .filter((a) => a.mimeType.includes("audio/mp3") ||
-                a.mimeType.includes("audio/mpeg") ||
-                a.mimeType.includes("audio/mp4"))
-                .sort((a, b) => {
-                if (a.bitrate && b.bitrate)
-                    return b.bitrate - a.bitrate;
-                return 0;
-            })
-                .sort((a, b) => {
-                let qualityToInt = (quality) => {
-                    if (quality?.includes("HIGH"))
-                        return 3;
-                    if (quality?.includes("MEDIUM"))
-                        return 2;
-                    if (quality?.includes("LOW"))
-                        return 1;
-                    return 1;
-                };
-                if (a.quality != undefined && b.quality != undefined)
-                    return qualityToInt(b.quality) - qualityToInt(a.quality);
-                return 0;
-            });
-            return best?.[0];
+        if (service === Service.spotify) {
+            throw "Streaming on Spotify is not supported. Try using resolveUnstreamableTrack() first!";
         }
-        if (this.service === Service.soundcloud) {
+        if (service === Service.soundcloud) {
             (0, util_1.debugLog)(this.audio);
             let best = this.audio
                 .filter((a) => a.url != undefined)
@@ -142,7 +112,7 @@ class MusicTrack {
             best.url = data.url;
             return best;
         }
-        if (this.service === Service.youtube) {
+        if (service === Service.youtube) {
             await this.fetchMissingAudio();
             let best = this.audio
                 .filter((a) => a.url != undefined)
@@ -171,7 +141,7 @@ class MusicTrack {
             (0, util_1.debugLog)(`Ranking YouTube best audio:`, best);
             return best?.[0];
         }
-        if (this.service === Service.audiofile) {
+        if (service === Service.audiofile) {
             return this.audio[0];
         }
         throw new Error("An error occurred when attempting to find best audio");
@@ -199,11 +169,21 @@ class MusicTrack {
     }
     async resolveUnstreamableTrack() {
         if (this.service === Service.spotify) {
-            let yt = (await (0, YouTube_1.YouTube_Search)(`${this.name} ${this.authors.map((v) => v.name).join(" ")}`, 1, "video"))?.[0];
-            if (yt instanceof MusicTrack)
-                return yt;
+            let query = `${this.name} ${this.authors.map((v) => v.name).join(" ")}`;
+            let yt = (await (0, YouTube_1.YouTube_Search)(query, 10, "video"))?.[0];
+            if (!yt)
+                return;
+            if (!(yt instanceof MusicTrack))
+                return;
+            await yt.fetchMissingAudio();
+            this.metadata.resolvedTo = Service.youtube;
+            this.audio = yt.audio;
+            return {
+                query: query,
+                result: yt,
+            };
         }
-        return null;
+        return;
     }
     async getGeniusSong() {
         let title = this.name.toLowerCase().replace(/(\(|)lyrics(\)|)/g, "");
@@ -242,6 +222,9 @@ class MusicPlaylist {
     }
     setQueuedBy(queuedBy) {
         this.metadata.queuedBy = queuedBy;
+        this.tracks.forEach((t) => {
+            t.setQueuedBy(queuedBy);
+        });
         return this;
     }
 }

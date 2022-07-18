@@ -24,9 +24,9 @@ export const AUDIOFILE_URL_PATTERN = new RegExp(
  */
 export async function AudioFile_Info(url: string, reqOptions: any): Promise<MusicTrack> {
 	url = url.trim();
-	if (!url) throw new Error("Given AudioFile URL is null!");
+	if (!url) throw "Given AudioFile URL is null!";
 	if (!url.match(AUDIOFILE_URL_PATTERN))
-		throw new Error("Given AudioFile URL is invalid or not an audio file.");
+		throw "Given AudioFile URL is invalid or not an audio file.";
 	// debugLog(data);
 
 	const { data, headers } = await axios
@@ -34,11 +34,13 @@ export async function AudioFile_Info(url: string, reqOptions: any): Promise<Musi
 		.catch((err) => {
 			throw err;
 		});
+	if (!data) throw "Audio file does not contain any data";
+
 	debugLog(`AudioFile Content Type: ${headers["content-type"]}`);
 
 	return MusicTrackFromAudioFile({
 		url: url,
-		...data,
+		data: data,
 		headers: headers,
 		meta: await metadata.parseStream(data),
 	});

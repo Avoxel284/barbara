@@ -36,6 +36,23 @@ barbara.setKey("SOUNDCLOUD_CLIENTID", await barbara.freeKey("SOUNDCLOUD_CLIENTID
 barbara.freeKey("YOUTUBE_INVIDIOUSSITE").then((key) => {
 	barbara.setKey("YOUTUBE_INVIDIOUSSITE", key);
 });
+
+// Set Spotify credentials.
+// When setting any keys that require authentication (only Spotify atm), Barbara will automatically
+// authenticate them and set other keys such as SPOTIFY_ACCESSTOKEN.
+barbara.setKeys({
+	SPOTIFY: {
+		CLIENTID: process.env.SPOTIFY_CLIENT_ID,
+		CLIENTSECRET: process.env.SPOTIFY_CLIENT_SECRET,
+	},
+});
+
+// Barbara will also automatically refresh authenticated keys when they are about to expire...
+barbara.setKey("CONFIG_REFRESHTOKENS", true)
+
+// ... however, you can also turn this off by setting CONFIG_REFRESHTOKENS to false.
+// A refreshTokens() function is provided for manually refreshing tokens. Provide true for the first parameter
+// and it will force refreshing the tokens rather than automatically checking if they are about to expire.
 ```
 
 Refer to the cheatsheet for auth key identifiers.
