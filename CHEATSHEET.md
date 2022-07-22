@@ -2,7 +2,7 @@
 
 ## Authentication keys
 
-Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, and `freeKey(<Key ID>)`.
+Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, `setKeys(<Object of keys>)` and `freeKey(<Key ID>)`.
 
 \* = Required to be set if using service <br>
 ^ = Can be provided via `freeKey()`
