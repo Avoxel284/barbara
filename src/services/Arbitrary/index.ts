@@ -35,6 +35,7 @@ export async function AudioFile_Info(url: string, reqOptions: any): Promise<Musi
 			throw err;
 		});
 	if (!data) throw "Audio file does not contain any data";
+	if (!data?.meta?.format?.duration) throw "Failed to parse file metadata: Duration is null";
 
 	debugLog(`AudioFile Content Type: ${headers["content-type"]}`);
 

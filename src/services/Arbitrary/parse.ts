@@ -4,12 +4,13 @@
  */
 
 import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../lib";
+import { debugLog } from "../../lib/util";
 
 export function MusicTrackFromAudioFile(data: any) {
-	console.log(data.meta);
+	debugLog(data.meta);
 	return new MusicTrack({
 		name:
-			data.meta.common.title ||
+			data?.meta?.common?.title ||
 			data.url.match(/[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))/g)?.[0] ||
 			data.url,
 		url: data.url,
@@ -23,13 +24,13 @@ export function MusicTrackFromAudioFile(data: any) {
 				url: data.url,
 				// bitrate: data.meta.format.bitrate,
 				mimeType: data.headers["content-type"],
-				protocol: "progressive??",
-				duration: data.meta.format.duration || 0,
-				codec: data.meta.format.codec,
+				protocol: "progressive",
+				duration: data?.meta?.format?.duration,
+				codec: data?.meta?.format?.codec,
 			},
 		],
 		author: {
-			name: data.meta.common.artist || "Not sure",
+			name: data?.meta?.common?.artist || "Not sure",
 		},
 		originalData: data,
 	});
