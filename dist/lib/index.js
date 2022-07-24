@@ -62,8 +62,6 @@ class MusicTrack {
             "-ac",
             "2",
         ];
-        if (audio?.bitrate && audio.bitrate < 510000)
-            args.push("-b:a", Math.round(audio.bitrate));
         if (extraArgs)
             args.push(...extraArgs);
         if (!extraArgs?.includes("-ar"))

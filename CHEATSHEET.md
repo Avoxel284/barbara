@@ -26,7 +26,7 @@ Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, `setKeys(<Object of key
 ### YouTube
 
 - **Cookie** - `YOUTUBE_COOKIE` <br> Provide a cookie string for accessing consent-required content
-- **^Invidious site URL** - `YOUTUBE_INVIDIOUSSITE` <br> Provide a different Invidous site URL. Using `freeKey()` is recommended.
+- **^Invidious site URL** - `YOUTUBE_INVIDIOUSSITE` <br> Provide a different Invidous site URL if the default site is too slow or down. Using `freeKey()` is recommended.
 
 ### Genius
 

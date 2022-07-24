@@ -1,6 +1,6 @@
 {
 	"name": "barbara-music",
-	"version": "0.0.22",
+	"version": "0.0.23",
 	"description": "Unified MusicTrack for easy audio streaming. Built for music-playing Discord bots in mind.",
 	"main": "dist/index",
 	"scripts": {
