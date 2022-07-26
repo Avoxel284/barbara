@@ -10,8 +10,8 @@ function MusicTrackFromAudioFile(data) {
             data.url.match(/[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))/g)?.[0] ||
             data.url,
         url: data.url,
-        thumbnail: "",
-        duration: data.meta.format.duration || 0,
+        thumbnail: data?.meta?.common?.picture?.[0]?.data,
+        duration: data?.meta?.format?.duration || 0,
         live: false,
         service: lib_1.Service.audiofile,
         audio: [

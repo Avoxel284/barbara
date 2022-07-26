@@ -35,7 +35,7 @@ export async function AudioFile_Info(url: string, reqOptions: any): Promise<Musi
 			throw err;
 		});
 	if (!data) throw "Audio file does not contain any data";
-	if (!data?.meta?.format?.duration) throw "Failed to parse file metadata: Duration is null";
+	// if (!data?.meta?.format?.duration) throw "Failed to parse file metadata: Duration is null";
 
 	debugLog(`AudioFile Content Type: ${headers["content-type"]}`);
 
@@ -43,7 +43,8 @@ export async function AudioFile_Info(url: string, reqOptions: any): Promise<Musi
 		url: url,
 		data: data,
 		headers: headers,
-		meta: await metadata.parseStream(data),
+		// gonna leave duration as true for now
+		meta: await metadata.parseStream(data, undefined, { duration: true }),
 	});
 
 	// call it unneccessary but at least all the data is in original data

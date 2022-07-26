@@ -368,6 +368,29 @@ export class MusicTrack {
 		if (this.audio && this.audio.length > 0) return;
 
 		if (this.service === Service.youtube) {
+			// // sometimes, youtube will return a 403 on audio urls due to ip reasons and being "secure" and "non-scrapable" and stuff like that
+			// // idk what those things mean but all i know is this way should work better
+			// let { data } = await axios.get(
+			// 	`${getKey("YOUTUBE_INVIDIOUSSITE")}/latest_version?id=${
+			// 		this.metadata.id || this.originalData.videoId
+			// 	}&itag=249`
+			// );
+			// if (!data) return;
+			// debugLog(`FetchMissingAudio data:`, data);
+
+			// this.audio = data.adaptiveFormats
+			// 	.filter((f: any) => f.audioQuality != null)
+			// 	.map((f: any) => {
+			// 		return {
+			// 			url: f.url,
+			// 			quality: f.audioQuality,
+			// 			mimeType: f.type,
+			// 			bitrate: f.bitrate,
+			// 		};
+			// 	});
+			// wait no all of the above is bs and i just realised that
+			// nothing to see here, scroll along
+
 			let { data } = await axios.get(
 				`${getKey("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${
 					this.metadata.id || this.originalData.videoId

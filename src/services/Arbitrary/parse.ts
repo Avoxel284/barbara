@@ -14,9 +14,9 @@ export function MusicTrackFromAudioFile(data: any) {
 			data.url.match(/[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))/g)?.[0] ||
 			data.url,
 		url: data.url,
-		thumbnail: "",
+		thumbnail: data?.meta?.common?.picture?.[0]?.data,
 		// thumbnail: Buffer.from(meta?.common?.picture?.[0]?.data),
-		duration: data.meta.format.duration || 0,
+		duration: data?.meta?.format?.duration || 0,
 		live: false,
 		service: Service.audiofile,
 		audio: [
@@ -24,6 +24,7 @@ export function MusicTrackFromAudioFile(data: any) {
 				url: data.url,
 				// bitrate: data.meta.format.bitrate,
 				mimeType: data.headers["content-type"],
+				// i think this is wrong but oh well
 				protocol: "progressive",
 				duration: data?.meta?.format?.duration,
 				codec: data?.meta?.format?.codec,

@@ -24,7 +24,7 @@ async function YouTube_Info(url) {
         videoId = url.split("youtube.com/playlist?list=")[1].split(/(\?|\/|&)/)[0];
     else
         videoId = (url.split("watch?v=")[1] ?? url.split("&v=")[1]).split(/(\?|\/|&)/)[0];
-    let { data } = await axios_1.default.get(`${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${videoId}`);
+    let { data } = await axios_1.default.get(`${(0, config_1.getKey)("YOUTUBE_INVIDIOUSSITE")}/api/v1/videos/${videoId}?local=true`);
     return (0, parse_1.MusicTrackFromYouTube)(data);
 }
 exports.YouTube_Info = YouTube_Info;

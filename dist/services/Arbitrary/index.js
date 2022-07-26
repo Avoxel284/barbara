@@ -23,14 +23,12 @@ async function AudioFile_Info(url, reqOptions) {
     });
     if (!data)
         throw "Audio file does not contain any data";
-    if (!data?.meta?.format?.duration)
-        throw "Failed to parse file metadata: Duration is null";
     (0, util_1.debugLog)(`AudioFile Content Type: ${headers["content-type"]}`);
     return (0, parse_1.MusicTrackFromAudioFile)({
         url: url,
         data: data,
         headers: headers,
-        meta: await music_metadata_1.default.parseStream(data),
+        meta: await music_metadata_1.default.parseStream(data, undefined, { duration: true }),
     });
 }
 exports.AudioFile_Info = AudioFile_Info;
