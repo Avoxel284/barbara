@@ -57,6 +57,8 @@ class MusicTrack {
             seek,
             "-i",
             url,
+            "-analyzeduration",
+            "0",
             "-f",
             "opus",
             "-ac",
