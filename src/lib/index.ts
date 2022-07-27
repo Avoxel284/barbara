@@ -259,12 +259,12 @@ export class MusicTrack {
 			// "64000",
 			// Audio channels
 			"-ac",
-			"2",
+			"1",
 		];
 		// bitrate acting up
 		// if (audio?.bitrate && audio.bitrate < 510000) args.push("-b:a", Math.round(audio.bitrate));
 		if (extraArgs) args.push(...extraArgs);
-		if (!extraArgs?.includes("-ar")) args.push("-ar", "48000");
+		// if (!extraArgs?.includes("-ar")) args.push("-ar", "48000");
 		debugLog(`MusicTrack FFmpeg args:`, args);
 
 		new prism.FFmpeg().on("error", (err) => {

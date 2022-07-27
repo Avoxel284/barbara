@@ -25,8 +25,8 @@ export const AUDIOFILE_URL_PATTERN = new RegExp(
 export async function AudioFile_Info(url: string, reqOptions: any): Promise<MusicTrack> {
 	url = url.trim();
 	if (!url) throw "Given AudioFile URL is null!";
-	if (!url.match(AUDIOFILE_URL_PATTERN))
-		throw "Given AudioFile URL is invalid or not an audio file.";
+	// if (!url.match(AUDIOFILE_URL_PATTERN))
+	// 	throw "Given AudioFile URL is invalid or not an audio file.";
 	// debugLog(data);
 
 	const { data, headers } = await axios
@@ -38,6 +38,7 @@ export async function AudioFile_Info(url: string, reqOptions: any): Promise<Musi
 	// if (!data?.meta?.format?.duration) throw "Failed to parse file metadata: Duration is null";
 
 	debugLog(`AudioFile Content Type: ${headers["content-type"]}`);
+	// headers["content-type"] = "audio/ogg"
 
 	return MusicTrackFromAudioFile({
 		url: url,
@@ -55,5 +56,6 @@ export async function AudioFile_Info(url: string, reqOptions: any): Promise<Musi
  * Check a URL and validate if it is a Audio File URL
  */
 export function AudioFile_Validate(url: string) {
+	return true;
 	return url.match(AUDIOFILE_URL_PATTERN);
 }

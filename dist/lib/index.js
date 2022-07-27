@@ -62,12 +62,10 @@ class MusicTrack {
             "-f",
             "opus",
             "-ac",
-            "2",
+            "1",
         ];
         if (extraArgs)
             args.push(...extraArgs);
-        if (!extraArgs?.includes("-ar"))
-            args.push("-ar", "48000");
         (0, util_1.debugLog)(`MusicTrack FFmpeg args:`, args);
         new prism_media_1.default.FFmpeg().on("error", (err) => {
             (0, util_1.debugLog)(`FFmpeg streaming error for ${this.name}: ${err}`);

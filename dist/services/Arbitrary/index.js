@@ -14,8 +14,6 @@ async function AudioFile_Info(url, reqOptions) {
     url = url.trim();
     if (!url)
         throw "Given AudioFile URL is null!";
-    if (!url.match(exports.AUDIOFILE_URL_PATTERN))
-        throw "Given AudioFile URL is invalid or not an audio file.";
     const { data, headers } = await axios_1.default
         .get(url, { responseType: "stream", ...reqOptions })
         .catch((err) => {
@@ -33,6 +31,7 @@ async function AudioFile_Info(url, reqOptions) {
 }
 exports.AudioFile_Info = AudioFile_Info;
 function AudioFile_Validate(url) {
+    return true;
     return url.match(exports.AUDIOFILE_URL_PATTERN);
 }
 exports.AudioFile_Validate = AudioFile_Validate;
