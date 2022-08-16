@@ -1,6 +1,6 @@
 # Barbara Music Module Cheatsheet
 
-## Authentication keys
+## Authentication/config keys
 
 Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, `setKeys(<Object of keys>)` and `freeKey(<Key ID>)`.
 
@@ -13,8 +13,6 @@ Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, `setKeys(<Object of key
 
 ### Spotify
 
-<u>To be implemented</u>
-
 - **\*Client ID** - `SPOTIFY_CLIENTID`
 - **\*Client secret** - `SPOTIFY_CLIENTSECRET` <br> Set client secret and ID and Barbara will automatically fill in the below (except market code)
 - **Access token** - `SPOTIFY_ACCESSTOKEN`
@@ -26,9 +24,11 @@ Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, `setKeys(<Object of key
 ### YouTube
 
 - **Cookie** - `YOUTUBE_COOKIE` <br> Provide a cookie string for accessing consent-required content
-- **^Invidious site URL** - `YOUTUBE_INVIDIOUSSITE` <br> Provide a different Invidous site URL if the default site is too slow or down. Using `freeKey()` is recommended. If setting manually, keep in mind the URL needs `http://` or `https://` at the start
+- **^Invidious site URL** - `YOUTUBE_INVIDIOUSSITE` <br> Provide a different Invidous site URL if the default site is too slow or down. Using `freeKey()` is recommended. If setting manually, keep in mind the URL requires `http://` or `https://` at the start
 
 ### Genius
+
+<u>To be implemented</u>
 
 - **Token** - `GENIUS_TOKEN` <br> A token obtainable via creating a new app on [Genius API clients dashboard](https://genius.com/api-clients)
 - **Cache lyrics?** - `GENIUS_LYRICSCACHING` <br> Cache lyrics in an internal object to make fetching lyrics faster? (Enabled by default)
@@ -37,3 +37,4 @@ Used in `getKey(<Key ID>)`, `setKey(<Key ID>, <value>)`, `setKeys(<Object of key
 
 - **Debug toggle** - `CONFIG_DEBUG` <br> A boolean that enables or disables debug console logging. Logs are prefixed with `[ Barbara Debug ]`
 - **Config file** - `CONFIG_FILE` <br> Path to a JSON file that contains configuration data. Will soon include a tool for generating config file.
+- **Auto refresh auth** - `CONFIG_AUTOREFRESH` <br> Automatically refresh tokens when they are about to expire, default is true.

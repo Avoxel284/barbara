@@ -56,6 +56,6 @@ export async function AudioFile_Info(url: string, reqOptions: any): Promise<Musi
  * Check a URL and validate if it is a Audio File URL
  */
 export function AudioFile_Validate(url: string) {
-	return true;
+	// return true;
 	return url.match(AUDIOFILE_URL_PATTERN);
 }

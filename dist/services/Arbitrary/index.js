@@ -31,7 +31,6 @@ async function AudioFile_Info(url, reqOptions) {
 }
 exports.AudioFile_Info = AudioFile_Info;
 function AudioFile_Validate(url) {
-    return true;
     return url.match(exports.AUDIOFILE_URL_PATTERN);
 }
 exports.AudioFile_Validate = AudioFile_Validate;

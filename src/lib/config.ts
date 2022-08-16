@@ -143,13 +143,13 @@ export function setKeys(ks: object): void {
 }
 
 /**
- * Read a configuration file and append to authenticaton keys.
+ * Read a configuration file in JSON format and append to authenticaton keys.
  *
  * @param path Path to configuration file
  * @param overwrite Overwrite keys that have been manually set? **Defaults to true.**
  */
 export function setKeyFile(path: string, overwrite: boolean = true): void {
-	if (!path || !path.match(/^(.+)\/([^\/]+)$/))
+	if (!path || !path.match(/^(.+)\/([^\/]+)$/) || !fs.existsSync(path))
 		throw "Given Barbara key configuration file path is invalid!";
 
 	try {

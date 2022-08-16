@@ -48,7 +48,7 @@ export async function authenticateKey(key0: string): Promise<object | undefined>
 
 /**
  * Automatically refresh all authenticated service keys.
- * If `CONFIG_AUTOREFRESH` is true, this will occur automatically.
+ * If `CONFIG_AUTOREFRESH` is true, this will occur automatically when tokens are about to expire.
  */
 export async function refreshTokens(service?: Service) {
 	if (service === Service.spotify || !service) {

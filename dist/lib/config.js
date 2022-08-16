@@ -82,7 +82,7 @@ function setKeys(ks) {
 }
 exports.setKeys = setKeys;
 function setKeyFile(path, overwrite = true) {
-    if (!path || !path.match(/^(.+)\/([^\/]+)$/))
+    if (!path || !path.match(/^(.+)\/([^\/]+)$/) || !fs_1.default.existsSync(path))
         throw "Given Barbara key configuration file path is invalid!";
     try {
         let fileContents = fs_1.default.readFileSync(path, { encoding: "utf-8" });
