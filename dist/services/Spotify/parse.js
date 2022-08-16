@@ -49,7 +49,6 @@ async function MusicPlaylistFromSpotify(data, isAlbum = false) {
             });
         }
     };
-    console.log(await fetchTracks());
     return new lib_1.MusicPlaylist({
         name: data.name,
         url: data.external_urls.spotify,

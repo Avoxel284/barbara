@@ -61,8 +61,6 @@ class MusicTrack {
             "0",
             "-f",
             "opus",
-            "-ac",
-            "1",
         ];
         if (extraArgs)
             args.push(...extraArgs);
@@ -104,11 +102,13 @@ class MusicTrack {
                 return 0;
             })?.[0];
             (0, util_1.debugLog)(best);
-            let { data } = await axios_1.default.get(`${best.url}`).catch((err) => {
+            let { data } = await axios_1.default.get(best.url).catch((err) => {
                 throw err;
             });
-            best.url = data.url;
-            return best;
+            return {
+                ...best,
+                url: data.url,
+            };
         }
         if (service === Service.youtube) {
             await this.fetchMissingAudio();

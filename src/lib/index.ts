@@ -258,8 +258,8 @@ export class MusicTrack {
 			// "-ar",
 			// "64000",
 			// Audio channels
-			"-ac",
-			"1",
+			// "-ac",
+			// "1",
 		];
 		// bitrate acting up
 		// if (audio?.bitrate && audio.bitrate < 510000) args.push("-b:a", Math.round(audio.bitrate));
@@ -281,9 +281,9 @@ export class MusicTrack {
 	/**
 	 * Returns the best audio format.
 	 *
-	 * **Note:** if SoundCloud is the service, `Audio.url` is changed to a time sensitive URL due to SoundCloud APIs.
+	 * ~~**Note:** if SoundCloud is the service, `Audio.url` is changed to a time sensitive URL due to SoundCloud APIs.~~
 	 *
-	 * **Note:** if Spotify is the service, the track will attempt to find an alternative track on YouTube.
+	 * **Note:** if Spotify is the service, use `resolveUnstreamableTrack()` to try and find an alternative track on YouTube.
 	 */
 	async bestAudio(): Promise<Audio> {
 		await this.fetchMissingAudio();
@@ -316,11 +316,15 @@ export class MusicTrack {
 				})?.[0];
 			debugLog(best);
 
-			let { data } = await axios.get(`${best.url}`).catch((err: Error) => {
+			let { data } = await axios.get(best.url).catch((err: Error) => {
 				throw err;
 			});
-			best.url = data.url;
-			return best;
+
+			return {
+				...best,
+				url: data.url,
+				// some pass by reference stuff was hapenning
+			};
 		}
 
 		if (service === Service.youtube) {

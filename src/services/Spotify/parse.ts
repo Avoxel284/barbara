@@ -49,8 +49,6 @@ export async function MusicPlaylistFromSpotify(data: any, isAlbum: boolean = fal
 		}
 	};
 
-	console.log(await fetchTracks())
-
 	return new MusicPlaylist({
 		name: data.name,
 		url: data.external_urls.spotify,
