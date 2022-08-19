@@ -68,7 +68,7 @@ export async function search(
 			break;
 	}
 
-	throw new Error("Interesting how its impossible for this error to ever occur");
+	throw new Error("Service was not specified");
 }
 
 /**
