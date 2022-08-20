@@ -59,7 +59,7 @@ async function Spotify_Search(query, limit = 5, type = "track") {
     if (!query)
         throw new Error("No query given!");
     if (limit > 50 || limit < 0)
-        throw "Limit is out of range for Spotify (0 - 50)";
+        throw "Limit is out of range (0 - 50)";
     const { data } = await axios_1.default
         .get(`https://api.spotify.com/v1/search?type=${type}&q=${query}&limit=${limit}&market=${(0, config_1.getKey)("SPOTIFY_MARKETCODE")}`, {
         headers: {

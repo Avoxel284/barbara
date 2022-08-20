@@ -3,7 +3,7 @@
  * Barbara Music Module / Spotify
  */
 
-import { BarbaraType, MusicPlaylist, MusicTrack, Service } from "../../lib";
+import { MusicPlaylist, MusicTrack, Service } from "../../lib";
 import axios from "axios";
 import { MusicTrackFromSpotify, MusicPlaylistFromSpotify } from "./parse";
 import { getKey, setKey } from "../../lib/config";
@@ -79,7 +79,7 @@ export async function Spotify_Search(
 	type: "track" | "playlist" | "album" = "track"
 ) {
 	if (!query) throw new Error("No query given!");
-	if (limit > 50 || limit < 0) throw "Limit is out of range for Spotify (0 - 50)";
+	if (limit > 50 || limit < 0) throw "Limit is out of range (0 - 50)";
 
 	const { data } = await axios
 		.get(
