@@ -56,7 +56,7 @@ async function search(query, options = {}) {
             throw "Bro really thought they could search for audio files";
             break;
     }
-    throw new Error("Interesting how its impossible for this error to ever occur");
+    throw new Error("Service was not specified");
 }
 exports.search = search;
 async function serviceFromURL(url) {
