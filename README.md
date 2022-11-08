@@ -4,7 +4,7 @@
 
 ## **WORK IN PROGRESS!**
 
-Library is in development, use at your own risk.
+Library is in development, use at your own risk. **Will finish working on this once I have the chance**
 
 <br>
 <br>
